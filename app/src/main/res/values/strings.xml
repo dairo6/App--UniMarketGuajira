@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">UniMarket Guajira</string>
+
+    <!-- Login -->
+    <string name="title_login">Iniciar Sesión</string>
+    <string name="hint_email">Correo electrónico</string>
+    <string name="hint_password">Contraseña</string>
+    <string name="btn_login">Ingresar</string>
+    <string name="text_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="text_no_account">¿No tienes cuenta? Regístrate</string>
+
+    <!-- Register -->
+    <string name="title_register">Registro</string>
+    <string name="hint_full_name">Nombre completo</string>
+    <string name="hint_confirm_password">Confirmar contraseña</string>
+    <string name="btn_register">Registrarse</string>
+    <string name="text_already_have_account">¿Ya tienes cuenta? Inicia sesión</string>
+
+    <!-- Forgot Password / Reset -->
+    <string name="title_reset_password">Restablecer Contraseña</string>
+    <string name="desc_reset_password">Ingresa tu correo para recibir un código de verificación.</string>
+    <string name="btn_send_code">Enviar Código</string>
+
+    <!-- Verify Code -->
+    <string name="title_verify_code">Verificar Código</string>
+    <string name="desc_verify_code">Ingresa el código enviado a tu correo.</string>
+    <string name="hint_code">Código de 6 dígitos</string>
+    <string name="btn_verify">Verificar</string>
+
+    <!-- Change Password -->
+    <string name="title_change_password">Nueva Contraseña</string>
+    <string name="hint_new_password">Nueva contraseña</string>
+    <string name="btn_save_password">Guardar Contraseña</string>
+</resources>
