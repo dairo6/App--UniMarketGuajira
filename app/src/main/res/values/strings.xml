@@ -31,4 +31,17 @@
     <string name="title_change_password">Nueva Contraseña</string>
     <string name="hint_new_password">Nueva contraseña</string>
     <string name="btn_save_password">Guardar Contraseña</string>
+    <!-- Main / Home -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_categories">Categorías</string>
+    <string name="nav_cart">Carrito</string>
+    <string name="nav_menu">Más</string>
+    <string name="hint_search">Buscar en UniMarket...</string>
+
+    <!-- Categories -->
+    <string name="cat_electronics">Tecnología</string>
+    <string name="cat_books">Libros</string>
+    <string name="cat_food">Comida</string>
+    <string name="cat_fashion">Moda</string>
+    <string name="cat_services">Servicios</string>
 </resources>

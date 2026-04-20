@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FFFFFFFF</color>
+    <color name="white">#FF121212</color>
+    <color name="primary">#FF81C784</color> <!-- Verde más claro para modo oscuro -->
+    <color name="primary_dark">#FF2E7D32</color>
+    <color name="accent">#FFFFD54F</color>
+    <color name="gray_light">#FF1E1E1E</color>
+    <color name="gray_text">#FFB0B0B0</color>
+</resources>
