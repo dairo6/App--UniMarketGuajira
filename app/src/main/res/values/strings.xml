@@ -37,11 +37,23 @@
     <string name="nav_cart">Carrito</string>
     <string name="nav_menu">Más</string>
     <string name="hint_search">Buscar en UniMarket...</string>
+    <string name="desc_notifications">Notificaciones</string>
+    <string name="desc_publish_product">Publicar Producto</string>
+    <string name="desc_remove_image">Eliminar imagen</string>
 
     <!-- Categories -->
-    <string name="cat_electronics">Tecnología</string>
     <string name="cat_books">Libros</string>
-    <string name="cat_food">Comida</string>
-    <string name="cat_fashion">Moda</string>
-    <string name="cat_services">Servicios</string>
+    <string name="cat_supplies">Útiles</string>
+    <string name="cat_lab">Laboratorio</string>
+    <string name="cat_tech">Tecnología</string>
+    <string name="cat_notes">Apuntes</string>
+    <string name="cat_others">Otros</string>
+
+    <!-- Product Condition -->
+    <string name="hint_condition">Estado del producto</string>
+    <string name="condition_new">Nuevo</string>
+    <string name="condition_used_like_new">Usado - Como nuevo</string>
+    <string name="condition_used_good">Usado - Buen estado</string>
+    <string name="condition_used_acceptable">Usado - Aceptable</string>
+    <string name="msg_max_images">Máximo 4 imágenes permitidas</string>
 </resources>

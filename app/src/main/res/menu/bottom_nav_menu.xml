@@ -9,6 +9,10 @@
         android:icon="@drawable/ic_categories"
         android:title="@string/nav_categories" />
     <item
+        android:id="@+id/nav_placeholder"
+        android:title=""
+        android:enabled="false" />
+    <item
         android:id="@+id/nav_cart"
         android:icon="@drawable/ic_cart"
         android:title="@string/nav_cart" />

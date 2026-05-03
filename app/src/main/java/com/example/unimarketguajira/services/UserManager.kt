@@ -1,16 +1,12 @@
-package com.example.unimarketguajira
+package com.example.unimarketguajira.services
 
 import android.content.Context
-
-data class User(
-    val fullName: String,
-    val email: String,
-    val password: String
-)
+import com.example.unimarketguajira.models.User
 
 object UserManager {
     private const val PREFS_NAME = "UniMarketPrefs"
     private const val KEY_USERS = "users_list"
+    private const val KEY_LOGGED_USER = "logged_user_email"
 
     fun registerUser(context: Context, user: User): Boolean {
         val users = getAllUsers(context).toMutableList()
@@ -22,7 +18,23 @@ object UserManager {
     }
 
     fun loginUser(context: Context, email: String, password: String): User? {
-        return getAllUsers(context).find { it.email == email && it.password == password }
+        val user = getAllUsers(context).find { it.email == email && it.password == password }
+        if (user != null) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putString(KEY_LOGGED_USER, email).apply()
+        }
+        return user
+    }
+
+    fun logout(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().remove(KEY_LOGGED_USER).apply()
+    }
+
+    fun getLoggedUser(context: Context): User? {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val email = prefs.getString(KEY_LOGGED_USER, null) ?: return null
+        return getAllUsers(context).find { it.email == email }
     }
 
     fun getAllUsers(context: Context): List<User> {
@@ -30,7 +42,6 @@ object UserManager {
         val usersString = prefs.getString(KEY_USERS, "") ?: ""
         
         val users = mutableListOf<User>()
-        // Siempre nos aseguramos de que el Admin exista si la lista está vacía
         if (usersString.isEmpty()) {
             val admin = User("Admin", "admin@unimarket.com", "123456")
             users.add(admin)

@@ -1,13 +1,15 @@
-package com.example.unimarketguajira
+package com.example.unimarketguajira.activities
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import com.google.android.material.textfield.TextInputLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.example.unimarketguajira.R
+import com.example.unimarketguajira.models.User
+import com.example.unimarketguajira.services.UserManager
+import com.google.android.material.textfield.TextInputLayout
 
 class RegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

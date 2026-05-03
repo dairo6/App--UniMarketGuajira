@@ -1,10 +1,12 @@
-package com.example.unimarketguajira
+package com.example.unimarketguajira.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.unimarketguajira.R
+import com.example.unimarketguajira.models.User
 
 class UserAdapter(private val users: List<User>) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
