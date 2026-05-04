@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.unimarketguajira.R
 import com.example.unimarketguajira.adapters.ProductAdapter
 import com.example.unimarketguajira.models.Product
+import com.example.unimarketguajira.repository.ProductRepository
 import com.example.unimarketguajira.services.UserManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -123,22 +124,33 @@ class MainActivity : AppCompatActivity() {
 
     private var allProducts: List<Product> = listOf()
 
+    override fun onResume() {
+        super.onResume()
+        updateProductsList()
+    }
+
+    private fun updateProductsList() {
+        allProducts = ProductRepository.getAllProducts()
+        findViewById<RecyclerView>(R.id.rvProducts).adapter = ProductAdapter(allProducts)
+    }
+
     private fun setupProducts() {
         val rvProducts = findViewById<RecyclerView>(R.id.rvProducts)
         
         // Grid de 2 columnas
         rvProducts.layoutManager = GridLayoutManager(this, 2)
         
-        allProducts = listOf(
+        val initialProducts = listOf(
             Product(1, "Calculadora TI-Nspire CX II CAS", "Calculadora gráfica avanzada para ingeniería y matemáticas.", 850000.0, "Riohacha", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_tech), getString(R.string.condition_new)),
             Product(2, "Libro: Cálculo de Stewart 8va Ed.", "Libro esencial para ingeniería. En muy buen estado.", 120000.0, "Maicao", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_books), getString(R.string.condition_used_good), true),
             Product(3, "Bata de Laboratorio XL", "Bata blanca reglamentaria para laboratorio de química.", 45000.0, "Riohacha", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_lab), getString(R.string.condition_used_like_new)),
             Product(4, "iPad Air 5ta Gen + Pencil", "Ideal para tomar apuntes digitales. 64GB de almacenamiento.", 2800000.0, "Uribia", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_tech), getString(R.string.condition_used_like_new)),
-            Product(5, "Kit de Dibujo Técnico", "Tablero y juego de escuadras profesionales.", 95000.0, "Riohacha", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_supplies), getString(R.string.condition_used_acceptable), true),
+            Product(5, "Kit de Drawing Técnico", "Tablero y juego de escuadras profesionales.", 95000.0, "Riohacha", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_supplies), getString(R.string.condition_used_acceptable), true),
             Product(6, "Apuntes Estructuras de Datos", "Apuntes completos del semestre 2023-2 con ejercicios resueltos.", 15000.0, "Manaure", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_notes), getString(R.string.condition_used_good))
         )
 
-        rvProducts.adapter = ProductAdapter(allProducts)
+        ProductRepository.setInitialProducts(initialProducts)
+        updateProductsList()
     }
 
     private fun filterProductsByCategory(category: String) {

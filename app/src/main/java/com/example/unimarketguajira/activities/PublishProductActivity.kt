@@ -15,7 +15,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.unimarketguajira.R
 import com.example.unimarketguajira.adapters.PublishImageAdapter
+import com.example.unimarketguajira.models.Product
+import com.example.unimarketguajira.repository.ProductRepository
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.textfield.TextInputEditText
 
 class PublishProductActivity : AppCompatActivity() {
 
@@ -98,10 +101,38 @@ class PublishProductActivity : AppCompatActivity() {
     }
 
     private fun handlePublish() {
+        val name = findViewById<TextInputEditText>(R.id.etProductName).text.toString().trim()
+        val priceText = findViewById<TextInputEditText>(R.id.etPrice).text.toString().trim()
+        val category = findViewById<AutoCompleteTextView>(R.id.spinnerCategory).text.toString()
+        val condition = findViewById<AutoCompleteTextView>(R.id.spinnerCondition).text.toString()
+        val description = findViewById<TextInputEditText>(R.id.etDescription).text.toString().trim()
+
+        if (name.isEmpty() || priceText.isEmpty() || category.isEmpty() || condition.isEmpty() || description.isEmpty()) {
+            Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         if (selectedImages.isEmpty()) {
             Toast.makeText(this, "Agrega al menos una foto", Toast.LENGTH_SHORT).show()
             return
         }
+
+        val price = priceText.toDoubleOrNull() ?: 0.0
+        
+        // Usamos un placeholder de recurso (Int) ya que el modelo se revirtió a List<Int>
+        val newProduct = Product(
+            id = System.currentTimeMillis().toInt(),
+            name = name,
+            description = description,
+            price = price,
+            location = "Riohacha",
+            imageUrls = listOf(R.drawable.ic_launcher_background),
+            category = category,
+            condition = condition
+        )
+
+        ProductRepository.addProduct(newProduct)
+
         Toast.makeText(this, "Producto publicado con éxito", Toast.LENGTH_LONG).show()
         finish()
     }

@@ -21,6 +21,7 @@ class ProductAdapter(private val products: List<Product>) : RecyclerView.Adapter
         val tvProductPrice: TextView = view.findViewById(R.id.tvProductPrice)
         val tvProductName: TextView = view.findViewById(R.id.tvProductName)
         val tvLocation: TextView = view.findViewById(R.id.tvLocation)
+        val tvCategory: TextView = view.findViewById(R.id.tvCategory)
         val ibFavorite: ImageButton = view.findViewById(R.id.ibFavorite)
     }
 
@@ -40,7 +41,8 @@ class ProductAdapter(private val products: List<Product>) : RecyclerView.Adapter
         
         holder.tvProductName.text = product.name
         holder.tvLocation.text = product.location
-        
+        holder.tvCategory.text = product.category
+
         val favoriteIcon = if (product.isFavorite) {
             android.R.drawable.btn_star_big_on
         } else {
