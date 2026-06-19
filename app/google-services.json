@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "628481234632",
+    "project_id": "marketplaceuniguajira",
+    "storage_bucket": "marketplaceuniguajira.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:628481234632:android:6db16c4d050474f3b1b7fd",
+        "android_client_info": {
+          "package_name": "com.example.unimarketguajira"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvaFW1pTJRT7rfaOTfa41d7s8q86tncWI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
