@@ -8,6 +8,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.unimarketguajira.R
+import com.example.unimarketguajira.models.loadProductImage
 
 class PublishImageAdapter(
     private val images: MutableList<Uri>,
@@ -36,15 +37,19 @@ class PublishImageAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is ImageViewHolder) {
-            holder.ivProductImage.setImageURI(images[position])
-            holder.btnRemoveImage.setOnClickListener { onRemoveClick(position) }
+            holder.ivProductImage.loadProductImage(images[position].toString())
+            holder.btnRemoveImage.setOnClickListener {
+                val currentPos = holder.adapterPosition
+                if (currentPos != RecyclerView.NO_POSITION && currentPos < images.size) {
+                    onRemoveClick(currentPos)
+                }
+            }
         } else if (holder is AddViewHolder) {
             holder.itemView.setOnClickListener { onAddClick() }
         }
     }
 
     override fun getItemCount(): Int {
-        // Show images + add button if images < 5
         return if (images.size < 5) images.size + 1 else 5
     }
 

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Avatar Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingBottom="16dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivDialogAvatar"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:src="@android:drawable/ic_menu_myplaces"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent"
+            app:strokeColor="@color/primary"
+            app:strokeWidth="2dp" />
+
+        <TextView
+            android:id="@+id/tvProfileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="Nombre del Estudiante" />
+
+        <TextView
+            android:id="@+id/tvProfileRole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:text="Estudiante UniGuajira" />
+    </LinearLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilProfileName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Nombre Completo"
+        android:visibility="gone"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilProfileRole"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Rol (Ej: Estudiante, Docente)"
+        android:visibility="gone"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilProfilePhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Teléfono / WhatsApp"
+        android:visibility="gone"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="phone" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilProfileUniversity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Universidad"
+        android:visibility="gone"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginVertical="8dp" />
+
+    <!-- Info Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="8dp">
+
+        <!-- Email -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="6dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_dialog_email"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:id="@+id/tvProfileEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:text="correo@uniguajira.edu.co" />
+        </LinearLayout>
+
+        <!-- Universidad -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="6dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_school"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:id="@+id/tvProfileUniversity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:text="Universidad de La Guajira" />
+        </LinearLayout>
+
+        <!-- Ubicación -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="6dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_mapmode"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:text="Sede Riohacha, La Guajira" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

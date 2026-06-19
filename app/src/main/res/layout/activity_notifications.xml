@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- Header / App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        app:elevation="4dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:navigationIconTint="@color/white"
+            app:title="Notificaciones"
+            app:titleCentered="true"
+            app:titleTextColor="@color/white" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Filtros de Notificaciones -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutFilters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:tabMode="scrollable"
+        app:tabSelectedTextColor="@color/primary"
+        app:tabIndicatorColor="@color/primary"
+        app:tabTextColor="@color/gray_text"
+        app:tabRippleColor="@null"
+        app:elevation="2dp">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Todas" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ventas" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Compras" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Favoritos" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sistema" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- Contenido Principal -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvNotifications"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="8dp"
+                tools:listitem="@layout/item_user" />
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/layoutEmptyState"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone"
+                android:padding="32dp">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@android:drawable/ic_popup_reminder"
+                    app:tint="@color/gray_text"
+                    android:alpha="0.5"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:id="@+id/tvEmptyState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No tienes notificaciones"
+                    android:textColor="@color/gray_text"
+                    android:textSize="16sp"
+                    android:gravity="center" />
+            </LinearLayout>
+
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</LinearLayout>

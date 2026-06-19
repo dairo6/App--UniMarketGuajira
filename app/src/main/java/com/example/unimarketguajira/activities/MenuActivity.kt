@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -12,8 +13,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.setPadding
 import com.example.unimarketguajira.R
 import com.example.unimarketguajira.services.UserManager
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -24,9 +28,18 @@ class MenuActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_menu)
 
+        val headerContainer = findViewById<View>(R.id.headerContainer)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, 0, systemBars.right, 0)
+            
+            // Ajustar el padding superior del header para evitar la barra de estado
+            headerContainer.setPadding(
+                headerContainer.paddingLeft,
+                systemBars.top + 16.dpToPx(),
+                headerContainer.paddingRight,
+                16.dpToPx()
+            )
             insets
         }
 
@@ -37,7 +50,10 @@ class MenuActivity : AppCompatActivity() {
             startActivity(Intent(this, PublishProductActivity::class.java))
         }
         
-        findViewById<TextView>(R.id.tvUserName).text = UserManager.getUser(this)?.username ?: "Estudiante"
+        lifecycleScope.launch {
+            val user = UserManager.getLoggedUser(this@MenuActivity)
+            findViewById<TextView>(R.id.tvUserName).text = user?.fullName ?: "Estudiante"
+        }
     }
 
     private fun setupBottomNavigation() {
@@ -69,17 +85,33 @@ class MenuActivity : AppCompatActivity() {
 
         addSection(container, "PRINCIPAL", listOf(
             MenuOption("Inicio", R.drawable.ic_home) { finish() },
-            MenuOption("Mi perfil", android.R.drawable.ic_menu_myplaces),
-            MenuOption("Mis publicaciones", R.drawable.ic_edit_note),
-            MenuOption("Favoritos", android.R.drawable.btn_star_big_on),
-            MenuOption("Historial", android.R.drawable.ic_menu_recent_history)
+            MenuOption("Mi perfil", android.R.drawable.ic_menu_myplaces) {
+                startActivity(Intent(this, ProfileActivity::class.java))
+            },
+            MenuOption("Mis publicaciones", R.drawable.ic_edit_note) {
+                startActivity(Intent(this, MyProductsActivity::class.java))
+            },
+            MenuOption("Favoritos", android.R.drawable.btn_star_big_on) {
+                startActivity(Intent(this, FavoritesActivity::class.java))
+            },
+            MenuOption("Historial", android.R.drawable.ic_menu_recent_history) {
+                startActivity(Intent(this, ViewHistoryActivity::class.java))
+            }
         ))
 
         addSection(container, "ACTIVIDAD", listOf(
-            MenuOption("Productos guardados", R.drawable.ic_cart),
-            MenuOption("Ventas", android.R.drawable.ic_menu_send),
-            MenuOption("Compras", android.R.drawable.ic_menu_agenda),
-            MenuOption("Notificaciones", R.drawable.ic_notifications)
+            MenuOption("Productos guardados", R.drawable.ic_cart) {
+                startActivity(Intent(this, FavoritesActivity::class.java))
+            },
+            MenuOption("Ventas", android.R.drawable.ic_menu_send) {
+                startActivity(Intent(this, MySalesActivity::class.java))
+            },
+            MenuOption("Compras", android.R.drawable.ic_menu_agenda) {
+                startActivity(Intent(this, MyPurchasesActivity::class.java))
+            },
+            MenuOption("Notificaciones", R.drawable.ic_notifications) {
+                startActivity(Intent(this, NotificationsActivity::class.java))
+            }
         ))
 
         addSection(container, "MARKETPLACE", listOf(
@@ -107,7 +139,7 @@ class MenuActivity : AppCompatActivity() {
     private fun addSection(container: LinearLayout, title: String, options: List<MenuOption>) {
         val sectionTitle = TextView(this).apply {
             text = title
-            textSize = 12spToPx().toFloat()
+            textSize = 12f
             setPadding(0, 24.dpToPx(), 0, 8.dpToPx())
             setTextColor(getColor(android.R.color.darker_gray))
             typeface = android.graphics.Typeface.DEFAULT_BOLD
@@ -116,8 +148,8 @@ class MenuActivity : AppCompatActivity() {
 
         val card = com.google.android.material.card.MaterialCardView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.match_parent,
-                LinearLayout.LayoutParams.wrap_content
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
             )
             radius = 12.dpToPx().toFloat()
             cardElevation = 2.dpToPx().toFloat()
@@ -126,7 +158,7 @@ class MenuActivity : AppCompatActivity() {
 
         val optionsContainer = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            paddingHorizontal = 16.dpToPx()
+            setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
         }
 
         options.forEachIndexed { index, option ->
@@ -139,7 +171,7 @@ class MenuActivity : AppCompatActivity() {
 
             if (index < options.size - 1) {
                 val divider = View(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.match_parent, 1.dpToPx())
+                    layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1.dpToPx())
                     setBackgroundColor(getColor(android.R.color.darker_gray))
                     alpha = 0.1f
                 }
@@ -160,7 +192,6 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun Int.dpToPx() = (this * resources.displayMetrics.density).toInt()
-    private fun Int.spToPx() = (this * resources.displayMetrics.scaledDensity).toInt()
 
     data class MenuOption(val title: String, val icon: Int, val action: (() -> Unit)? = null)
 }

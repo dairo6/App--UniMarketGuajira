@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- Header / App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        app:elevation="4dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:navigationIconTint="@color/white"
+            app:title="Confirmar Compra"
+            app:titleCentered="true"
+            app:titleTextColor="@color/white" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Sección: Productos a Comprar -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Productos seleccionados"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                android:layout_marginBottom="16dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvConfirmProducts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    tools:listitem="@layout/item_cart" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Sección: Punto de Entrega en el Campus -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Entrega en el Campus"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Punto de encuentro"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary"
+                        android:layout_marginBottom="16dp">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerDeliveryPoint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="@color/black" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Observaciones (Ej: entregar después de 2pm)"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etDeliveryNotes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textMultiLine"
+                            android:maxLines="3"
+                            android:textColor="@color/black" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Sección: Método de Pago (Pasarela Preparada) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Método de Pago"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="0dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Seleccionar método de pago"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerPaymentMethod"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="@color/black" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Barra inferior con el Total y Botón Comprar -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="16dp"
+        app:cardCornerRadius="0dp"
+        app:strokeWidth="0dp"
+        app:cardBackgroundColor="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Total a pagar:"
+                    android:textSize="13sp"
+                    android:textColor="@color/gray_text"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvConfirmTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:text="$ 120.000" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnPlaceOrder"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:paddingHorizontal="24dp"
+                android:text="Confirmar y Comprar"
+                android:textSize="14sp"
+                android:backgroundTint="@color/primary"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

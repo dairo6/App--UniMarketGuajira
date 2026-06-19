@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Product Image -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProductImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:src="@android:drawable/ic_menu_gallery" />
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvProductName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/ibDelete"
+            app:layout_constraintStart_toEndOf="@id/ivProductImage"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Calculadora Casio fx-991LA PLUS" />
+
+        <!-- Price -->
+        <TextView
+            android:id="@+id/tvProductPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/ivProductImage"
+            app:layout_constraintTop_toBottomOf="@id/tvProductName"
+            tools:text="$ 85.000" />
+
+        <!-- Category -->
+        <TextView
+            android:id="@+id/tvCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:textColor="@color/gray_text"
+            android:textSize="11sp"
+            app:layout_constraintStart_toEndOf="@id/ivProductImage"
+            app:layout_constraintTop_toBottomOf="@id/tvProductPrice"
+            tools:text="Tecnología" />
+
+        <!-- Viewed Date and Time -->
+        <TextView
+            android:id="@+id/tvViewedDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/gray_text"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-light"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivProductImage"
+            app:layout_constraintTop_toBottomOf="@id/tvCategory"
+            tools:text="Visto: Hoy, 09:30 AM" />
+
+        <!-- Delete item from history action (Trash icon) -->
+        <ImageButton
+            android:id="@+id/ibDelete"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="@color/red"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Actions panel (Favorite + Add to Cart) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageButton
+                android:id="@+id/ibFavorite"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/btn_star_big_off"
+                app:tint="@color/primary"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddToCart"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Al carrito"
+                app:icon="@drawable/ic_cart"
+                app:iconSize="14dp"
+                app:iconTint="@color/white"
+                android:textSize="11sp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

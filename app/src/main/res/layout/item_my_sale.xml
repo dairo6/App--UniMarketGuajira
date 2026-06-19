@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:strokeWidth="0dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Fila Superior: Imagen + Nombre/Precio + Estado -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <ImageView
+                    android:id="@+id/ivSaleProductImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    tools:src="@drawable/ic_launcher_background"
+                    android:contentDescription="Imagen del producto" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/tvSaleProductName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    tools:text="Calculadora TI-Nspire CX II CAS" />
+
+                <TextView
+                    android:id="@+id/tvSaleProductPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    tools:text="$ 850.000" />
+
+                <!-- Badge de Estado -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSaleStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    app:cardCornerRadius="6dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="#FFF9C4"> <!-- PENDING default yellow -->
+
+                    <TextView
+                        android:id="@+id/tvSaleStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="3dp"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="#F57C00"
+                        tools:text="🟡 PENDIENTE" />
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="12dp"
+            android:background="#E0E0E0" />
+
+        <!-- Detalles de la Compra -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Comprador -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="Comprador:"
+                    android:textColor="@color/gray_text"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tvSaleBuyer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gray_dark"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="juan.perez@uniguajira.edu.co" />
+            </LinearLayout>
+
+            <!-- Fecha de Compra -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="Fecha:"
+                    android:textColor="@color/gray_text"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tvSaleDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gray_dark"
+                    android:textSize="13sp"
+                    tools:text="18/06/2026 09:30 AM" />
+            </LinearLayout>
+
+            <!-- Método de Pago -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="Método de pago:"
+                    android:textColor="@color/gray_text"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tvSalePaymentMethod"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gray_dark"
+                    android:textSize="13sp"
+                    tools:text="Efectivo" />
+            </LinearLayout>
+
+            <!-- Punto de Encuentro -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="Encuentro:"
+                    android:textColor="@color/gray_text"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tvSaleDeliveryPoint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gray_dark"
+                    android:textSize="13sp"
+                    tools:text="Biblioteca Bloque B (Segundo Piso)" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Botones de Acción (Si procede) -->
+        <LinearLayout
+            android:id="@+id/layoutSaleActions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <!-- Botón Cancelar (Visible en PENDING) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaleCancel"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancelar venta"
+                android:textColor="@color/red"
+                app:icon="@android:drawable/ic_menu_close_clear_cancel"
+                app:iconSize="16dp"
+                app:iconTint="@color/red"
+                android:layout_marginEnd="8dp" />
+
+            <!-- Botón Confirmar (Visible en PENDING) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaleConfirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confirmar"
+                android:textSize="12sp"
+                app:icon="@android:drawable/checkbox_on_background"
+                app:iconSize="16dp"
+                app:iconTint="@color/white"
+                android:backgroundTint="@color/primary"
+                android:textColor="@color/white" />
+
+            <!-- Botón Entregado (Visible en CONFIRMED) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaleMarkDelivered"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Marcar como entregado"
+                android:textSize="12sp"
+                app:icon="@android:drawable/ic_menu_send"
+                app:iconSize="16dp"
+                app:iconTint="@color/white"
+                android:backgroundTint="@color/primary"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

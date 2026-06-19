@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:id="@+id/layoutNotificationContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
+
+        <!-- Icono de Categoría de Notificación -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardNotificationIconBg"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="#E8F5E9"> <!-- Light green default -->
+
+            <ImageView
+                android:id="@+id/ivNotificationIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_popup_reminder"
+                app:tint="@color/primary"
+                android:contentDescription="Icono de notificación" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Textos de la Notificación -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvNotificationTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="¡Nueva venta!" />
+
+            <TextView
+                android:id="@+id/tvNotificationMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/gray_dark"
+                android:textSize="13sp"
+                tools:text="Juan Pérez compró tu Calculadora TI-Nspire" />
+
+            <TextView
+                android:id="@+id/tvNotificationTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/gray_text"
+                android:textSize="11sp"
+                tools:text="Hace 5 minutos" />
+        </LinearLayout>
+
+        <!-- Indicador Leída / No Leída (Punto de Color) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardUnreadDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_gravity="center"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/accent"
+            android:visibility="visible"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

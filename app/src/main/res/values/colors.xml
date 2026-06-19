@@ -4,7 +4,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#FF2E7D32</color> <!-- Verde bosque -->
     <color name="primary_dark">#FF1B5E20</color>
+    <color name="primary_light">#E8F5E9</color>
     <color name="accent">#FFF9A825</color> <!-- Amarillo/Naranja Guajira -->
+    <color name="secondary">#FF455A64</color> <!-- Blue Gray -->
+    <color name="red">#FFE53935</color>
     <color name="gray_light">#F5F5F5</color>
     <color name="gray_text">#757575</color>
     <color name="gray_dark">#424242</color>

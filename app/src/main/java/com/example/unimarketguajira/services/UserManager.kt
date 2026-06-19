@@ -1,29 +1,83 @@
 package com.example.unimarketguajira.services
 
 import android.content.Context
+import com.example.unimarketguajira.data.db.UniMarketDatabase
+import com.example.unimarketguajira.data.entities.UserEntity
 import com.example.unimarketguajira.models.User
+import com.example.unimarketguajira.utils.NetworkUtils
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 object UserManager {
     private const val PREFS_NAME = "UniMarketPrefs"
-    private const val KEY_USERS = "users_list"
     private const val KEY_LOGGED_USER = "logged_user_email"
 
-    fun registerUser(context: Context, user: User): Boolean {
-        val users = getAllUsers(context).toMutableList()
-        if (users.any { it.email == user.email }) return false
-        
-        users.add(user)
-        saveUsers(context, users)
+    suspend fun registerUser(context: Context, user: User): Boolean {
+        val userDao = UniMarketDatabase.getDatabase(context).userDao()
+
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                val doc = db.collection("users").document(user.email).get().await()
+                if (doc.exists()) {
+                    return false
+                }
+                db.collection("users").document(user.email).set(user).await()
+                // Sync to local database
+                userDao.insertUser(UserEntity.fromModel(user))
+                return true
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        // Fallback local registration
+        val existing = userDao.getUserByEmail(user.email)
+        if (existing != null) return false
+
+        userDao.insertUser(UserEntity.fromModel(user))
         return true
     }
 
-    fun loginUser(context: Context, email: String, password: String): User? {
-        val user = getAllUsers(context).find { it.email == email && it.password == password }
-        if (user != null) {
+    suspend fun loginUser(context: Context, email: String, password: String): User? {
+        val userDao = UniMarketDatabase.getDatabase(context).userDao()
+
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                val doc = db.collection("users").document(email).get().await()
+                if (doc.exists()) {
+                    val user = doc.toObject(User::class.java)
+                    if (user != null && user.password == password) {
+                        // Sync to local database
+                        userDao.insertUser(UserEntity.fromModel(user))
+                        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                        prefs.edit().putString(KEY_LOGGED_USER, email).apply()
+                        return user
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        val userEntity = userDao.login(email, password)
+        
+        // Initialize admin if needed
+        if (userEntity == null && email == "admin@unimarket.com" && password == "123456") {
+            val adminUser = User("Admin", "admin@unimarket.com", "123456")
+            userDao.insertUser(UserEntity.fromModel(adminUser))
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putString(KEY_LOGGED_USER, adminUser.email).apply()
+            return adminUser
+        }
+
+        if (userEntity != null) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().putString(KEY_LOGGED_USER, email).apply()
+            return userEntity.toModel()
         }
-        return user
+        return null
     }
 
     fun logout(context: Context) {
@@ -31,33 +85,55 @@ object UserManager {
         prefs.edit().remove(KEY_LOGGED_USER).apply()
     }
 
-    fun getLoggedUser(context: Context): User? {
+    fun getLoggedUserEmail(context: Context): String? {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val email = prefs.getString(KEY_LOGGED_USER, null) ?: return null
-        return getAllUsers(context).find { it.email == email }
+        return prefs.getString(KEY_LOGGED_USER, null)
     }
 
-    fun getAllUsers(context: Context): List<User> {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val usersString = prefs.getString(KEY_USERS, "") ?: ""
-        
-        val users = mutableListOf<User>()
-        if (usersString.isEmpty()) {
-            val admin = User("Admin", "admin@unimarket.com", "123456")
-            users.add(admin)
-            saveUsers(context, users)
-            return users
-        }
-        
-        return usersString.split(";").filter { it.isNotEmpty() }.map {
-            val parts = it.split("|")
-            User(parts[0], parts[1], parts[2])
-        }
+    suspend fun getLoggedUser(context: Context): User? {
+        val email = getLoggedUserEmail(context) ?: return null
+        val userDao = UniMarketDatabase.getDatabase(context).userDao()
+        return userDao.getUserByEmail(email)?.toModel()
     }
 
-    private fun saveUsers(context: Context, users: List<User>) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val usersString = users.joinToString(";") { "${it.fullName}|${it.email}|${it.password}" }
-        prefs.edit().putString(KEY_USERS, usersString).apply()
+    suspend fun getUserByEmail(context: Context, email: String): User? {
+        val userDao = UniMarketDatabase.getDatabase(context).userDao()
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                val doc = db.collection("users").document(email).get().await()
+                if (doc.exists()) {
+                    val user = doc.toObject(User::class.java)
+                    if (user != null) {
+                        userDao.insertUser(UserEntity.fromModel(user))
+                        return user
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        return userDao.getUserByEmail(email)?.toModel()
+    }
+
+    suspend fun updateUserProfile(context: Context, email: String, newName: String): Boolean {
+        val userDao = UniMarketDatabase.getDatabase(context).userDao()
+        val userEntity = userDao.getUserByEmail(email) ?: return false
+        val updatedUser = userEntity.toModel().copy(fullName = newName)
+        return updateUser(context, updatedUser)
+    }
+
+    suspend fun updateUser(context: Context, user: User): Boolean {
+        val userDao = UniMarketDatabase.getDatabase(context).userDao()
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                db.collection("users").document(user.email).set(user).await()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        userDao.insertUser(UserEntity.fromModel(user))
+        return true
     }
 }

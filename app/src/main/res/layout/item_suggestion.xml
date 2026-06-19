@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="14dp"
+    android:paddingHorizontal="16dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageView
+        android:id="@+id/ivSuggestionIcon"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@android:drawable/ic_menu_search"
+        app:tint="@color/primary"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="Búsqueda" />
+
+    <TextView
+        android:id="@+id/tvSuggestionText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@color/gray_dark"
+        android:textSize="14sp"
+        android:textStyle="normal" />
+
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/ic_chevron_right"
+        app:tint="@color/gray_text"
+        android:contentDescription="Seleccionar" />
+</LinearLayout>

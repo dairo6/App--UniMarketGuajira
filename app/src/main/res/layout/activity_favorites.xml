@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- Header / App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        app:elevation="4dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:navigationIconTint="@color/white"
+            app:title="Mis Favoritos"
+            app:titleCentered="true"
+            app:titleTextColor="@color/white" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Favorites Content -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvFavorites"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingVertical="8dp"
+            android:clipToPadding="false" />
+
+        <!-- Empty State -->
+        <LinearLayout
+            android:id="@+id/layoutEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@android:drawable/btn_star_big_off"
+                app:tint="@color/gray_text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Sin favoritos guardados"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Explora los productos de UniMarket Guajira y guarda los que te interesen haciendo clic en la estrella."
+                android:textColor="@color/gray_text"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

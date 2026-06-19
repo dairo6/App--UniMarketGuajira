@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.unimarketguajira.R
 
@@ -30,7 +30,7 @@ class CategoriesFragment : Fragment() {
         }
 
         val rvCategories = view.findViewById<RecyclerView>(R.id.rvCategories)
-        rvCategories.layoutManager = LinearLayoutManager(requireContext())
+        rvCategories.layoutManager = GridLayoutManager(requireContext(), 2)
         
         val categories = listOf(
             CategoryItem(getString(R.string.cat_books), R.drawable.ic_book),
@@ -61,6 +61,17 @@ class CategoriesFragment : Fragment() {
             val item = items[position]
             holder.tvName.text = item.name
             holder.ivIcon.setImageResource(item.iconRes)
+
+            holder.itemView.setOnClickListener {
+                val fragment = HomeFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("CATEGORY", item.name)
+                    }
+                }
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .commit()
+            }
         }
 
         override fun getItemCount() = items.size

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:strokeWidth="0dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Imagen principal -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <ImageView
+                    android:id="@+id/ivMyProductImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    tools:src="@drawable/ic_launcher_background"
+                    android:contentDescription="Foto del producto" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Datos del producto -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/tvMyProductName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    tools:text="Calculadora TI-Nspire CX II CAS" />
+
+                <TextView
+                    android:id="@+id/tvMyProductPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    tools:text="$ 850.000" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:id="@+id/tvMyProductCategory"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/gray_text"
+                        android:textSize="12sp"
+                        tools:text="Tecnología" />
+
+                    <!-- Indicador de Estado -->
+                    <TextView
+                        android:id="@+id/tvMyProductStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="🟢 Activo" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="12dp"
+            android:background="#E0E0E0" />
+
+        <!-- Botones de Acción -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <!-- Editar siempre visible -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMyProductEdit"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Editar"
+                android:textColor="@color/secondary"
+                app:icon="@android:drawable/ic_menu_edit"
+                app:iconSize="16dp"
+                app:iconTint="@color/secondary" />
+
+            <!-- Marcar como vendido (sólo ACTIVE) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMyProductMarkSold"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vender"
+                android:textColor="@color/primary"
+                app:icon="@android:drawable/ic_menu_send"
+                app:iconSize="16dp"
+                app:iconTint="@color/primary" />
+
+            <!-- Volver a publicar (sólo INACTIVE/SOLD) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMyProductReactivate"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Publicar"
+                android:textColor="@color/primary"
+                app:icon="@android:drawable/ic_input_add"
+                app:iconSize="16dp"
+                app:iconTint="@color/primary"
+                android:visibility="gone" />
+
+            <!-- Ocultar (eliminar lógicamente - sólo ACTIVE) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMyProductDelete"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ocultar"
+                android:textColor="@color/red"
+                app:icon="@android:drawable/ic_menu_close_clear_cancel"
+                app:iconSize="16dp"
+                app:iconTint="@color/red" />
+
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -4,42 +4,92 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_light">
+    android:background="#F8F9FA">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:elevation="0dp"
         android:background="@color/primary">
 
         <LinearLayout
+            android:id="@+id/searchBarContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="12dp">
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
 
-            <EditText
-                android:id="@+id/etSearch"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_search_bar"
-                android:drawableStart="@android:drawable/ic_menu_search"
-                android:drawablePadding="8dp"
-                android:hint="@string/hint_search"
-                android:inputType="text"
-                android:paddingHorizontal="12dp"
-                android:textSize="14sp"
-                android:importantForAutofill="no" />
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="0dp">
 
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="12dp"
-                android:contentDescription="@string/desc_notifications"
-                android:src="@drawable/ic_notifications"
-                app:tint="@color/white" />
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:drawableStart="@android:drawable/ic_menu_search"
+                    android:drawablePadding="8dp"
+                    android:drawableTint="@color/gray_text"
+                    android:hint="Buscar en UniMarket..."
+                    android:inputType="text"
+                    android:paddingHorizontal="16dp"
+                    android:textColorHint="@color/gray_text"
+                    android:textSize="15sp"
+                    android:importantForAutofill="no" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <FrameLayout
+                android:id="@+id/flNotificationIcon"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="Notificaciones"
+                    android:src="@android:drawable/ic_popup_reminder"
+                    app:tint="@color/white" />
+
+                <!-- Punto de notificación -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardNotificationBadge"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="6dp"
+                    app:cardBackgroundColor="#8BC34A"
+                    app:cardCornerRadius="8dp"
+                    app:strokeColor="@color/white"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp">
+                    
+                    <TextView
+                        android:id="@+id/tvNotificationBadgeCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:textStyle="bold"/>
+                </com.google.android.material.card.MaterialCardView>
+
+            </FrameLayout>
         </LinearLayout>
 
         <HorizontalScrollView
@@ -47,9 +97,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
-            android:contentDescription="@string/nav_categories"
-            android:paddingVertical="12dp"
-            android:scrollbars="none">
+            android:paddingVertical="16dp"
+            android:scrollbars="none"
+            android:clipToPadding="false"
+            android:elevation="4dp">
 
             <LinearLayout
                 android:id="@+id/categoriesContainer"
@@ -57,7 +108,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
-                android:layoutAnimation="@anim/layout_animation_fall_down"
                 android:gravity="center_vertical">
                 <!-- Dinámico -->
             </LinearLayout>
@@ -72,5 +122,41 @@
         android:padding="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:listitem="@layout/item_product" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSuggestions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_gravity="top|center_horizontal"
+        android:visibility="gone"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:strokeWidth="0dp"
+        app:cardBackgroundColor="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSuggestions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never" />
+
+            <TextView
+                android:id="@+id/tvNoSuggestions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="@string/no_suggestions"
+                android:textColor="@color/gray_text"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:visibility="gone" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

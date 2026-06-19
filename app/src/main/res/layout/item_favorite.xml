@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Image Container -->
+        <FrameLayout
+            android:id="@+id/imageContainer"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivProductImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent"
+                tools:src="@android:drawable/ic_menu_gallery" />
+
+            <!-- Unavailable overlay -->
+            <TextView
+                android:id="@+id/tvUnavailableOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#A6000000"
+                android:gravity="center"
+                android:text="Ya no disponible"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Product Name -->
+        <TextView
+            android:id="@+id/tvProductName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Nombre del Producto"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/ibFavorite"
+            app:layout_constraintStart_toEndOf="@id/imageContainer"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Product Price -->
+        <TextView
+            android:id="@+id/tvProductPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:text="$ 0.00"
+            android:textColor="@color/primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/imageContainer"
+            app:layout_constraintTop_toBottomOf="@id/tvProductName" />
+
+        <!-- Category -->
+        <TextView
+            android:id="@+id/tvCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="2dp"
+            android:text="Categoría"
+            android:textColor="@color/gray_text"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@id/imageContainer"
+            app:layout_constraintTop_toBottomOf="@id/tvProductPrice" />
+
+        <!-- Location Group -->
+        <LinearLayout
+            android:id="@+id/locationLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toEndOf="@id/imageContainer"
+            app:layout_constraintTop_toBottomOf="@id/tvCategory">
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:src="@android:drawable/ic_menu_mylocation"
+                app:tint="@color/gray_text" />
+
+            <TextView
+                android:id="@+id/tvLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="Ubicación"
+                android:textColor="@color/gray_text"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Remove from favorites action button (Filled Star) -->
+        <ImageButton
+            android:id="@+id/ibFavorite"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/btn_star_big_on"
+            app:tint="@color/primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Add to cart action button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddToCart"
+            style="@style/Widget.Material3.Button.IconButton.Filled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Al carrito"
+            app:icon="@drawable/ic_cart"
+            app:iconSize="16dp"
+            app:iconTint="@color/white"
+            android:textSize="12sp"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

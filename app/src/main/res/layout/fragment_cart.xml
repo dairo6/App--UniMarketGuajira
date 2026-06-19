@@ -1,79 +1,340 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/gray_light">
 
+    <!-- Status Bar Spacer -->
     <View
         android:id="@+id/statusBarSpacer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/primary" />
+        android:background="@color/primary"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/primary"
-        app:title="@string/nav_cart"
-        app:titleTextColor="@color/white" />
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:navigationIconTint="@color/white"
+        app:title="Carrito de Compras"
+        app:titleTextColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/statusBarSpacer" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCartItems"
+    <!-- Contenido Principal Deslizable -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:padding="8dp"
-        tools:listitem="@layout/item_cart" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardElevation="8dp"
-        app:cardCornerRadius="0dp">
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/bottomTotalCard">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingBottom="24dp">
 
+            <!-- Contenedor del Carrito (con ítems) -->
+            <LinearLayout
+                android:id="@+id/layoutCartItems"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvItemsCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/bg_search_bar"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:textColor="@color/black"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="3 items" />
+
+                <!-- Lista de productos -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCartItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:padding="8dp"
+                    android:nestedScrollingEnabled="false"
+                    tools:listitem="@layout/item_cart" />
+
+                <!-- Tarjeta Resumen de Compra -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    app:cardCornerRadius="16dp"
+                    app:strokeWidth="0dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Resumen de compra"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- Subtotal -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp">
+
+                            <TextView
+                                android:id="@+id/tvSummarySubtotalLabel"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Productos (0)"
+                                android:textColor="@color/gray_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvSummarySubtotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                tools:text="$0" />
+                        </LinearLayout>
+
+                        <!-- Entrega -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Entrega (Campus UniGuajira)"
+                                android:textColor="@color/gray_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Gratis"
+                                android:textColor="@color/primary"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Descuento -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Descuentos"
+                                android:textColor="@color/gray_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="-$0"
+                                android:textColor="@color/secondary"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#E0E0E0"
+                            android:layout_marginBottom="12dp" />
+
+                        <!-- Total -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Total"
+                                android:textColor="@color/black"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvSummaryTotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/primary"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                tools:text="$0" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- Contenedor de Carrito Vacío (Oculto por defecto) -->
+            <LinearLayout
+                android:id="@+id/layoutEmptyCart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="40dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:src="@drawable/ic_cart"
+                    app:tint="@color/gray_dark"
+                    android:contentDescription="Carrito vacío" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="¡Tu carrito está vacío!"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Aún no has añadido productos a tu carrito de compras."
+                    android:textAlignment="center"
+                    android:textColor="@color/gray_dark"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/btnExplore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:paddingHorizontal="32dp"
+                    android:text="Explorar productos"
+                    android:backgroundTint="@color/primary"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+
+            <!-- Recomendaciones -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:layout_marginTop="16dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Total:"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Recomendados para ti"
+                    android:textColor="@color/black"
                     android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvRecommendations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:paddingHorizontal="12dp"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_product" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Total y Botón Pegados Abajo (Barra de Acciones Fija) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomTotalCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="16dp"
+        app:cardCornerRadius="0dp"
+        app:strokeWidth="0dp"
+        app:cardBackgroundColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/layoutTotalBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Total:"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_text"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvTotalPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="$0"
                     android:textColor="@color/primary"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="$ 145,50" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btnCheckout"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="16dp"
-                android:text="Finalizar Compra"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:paddingHorizontal="24dp"
+                android:text="Continuar compra"
+                android:textSize="14sp"
                 android:backgroundTint="@color/primary"
                 android:textColor="@color/white" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

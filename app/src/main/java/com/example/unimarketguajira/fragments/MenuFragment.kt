@@ -13,7 +13,16 @@ import androidx.fragment.app.Fragment
 import com.example.unimarketguajira.R
 import com.example.unimarketguajira.activities.LoginActivity
 import com.example.unimarketguajira.activities.PublishProductActivity
+import com.example.unimarketguajira.activities.MyProductsActivity
+import com.example.unimarketguajira.activities.MySalesActivity
+import com.example.unimarketguajira.activities.NotificationsActivity
+import com.example.unimarketguajira.activities.ProfileActivity
+import com.example.unimarketguajira.activities.MyPurchasesActivity
+import com.example.unimarketguajira.activities.ViewHistoryActivity
+import com.example.unimarketguajira.activities.FavoritesActivity
 import com.example.unimarketguajira.services.UserManager
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MenuFragment : Fragment() {
 
@@ -23,45 +32,113 @@ class MenuFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_menu, container, false)
         
+        val headerContainer = view.findViewById<View>(R.id.headerContainer)
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(headerContainer) { v, insets ->
+            val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, systemBars.top + 16.dpToPx(), v.paddingRight, 16.dpToPx())
+            insets
+        }
+
         setupMenuSections(view)
         
-        val userName = UserManager.getLoggedUser(requireContext())?.fullName ?: "Estudiante"
-        view.findViewById<TextView>(R.id.tvUserName).text = userName
+        viewLifecycleOwner.lifecycleScope.launch {
+            val user = UserManager.getLoggedUser(requireContext())
+            view.findViewById<TextView>(R.id.tvUserName).text = user?.fullName ?: "Estudiante"
+        }
         
         return view
+    }
+
+    private fun openFragment(fragment: Fragment) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun openCategory(categoryName: String) {
+        val fragment = HomeFragment().apply {
+            arguments = Bundle().apply {
+                putString("CATEGORY", categoryName)
+            }
+        }
+        openFragment(fragment)
+    }
+
+    private fun showProfileDialog(user: com.example.unimarketguajira.models.User) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_profile, null)
+        dialogView.findViewById<TextView>(R.id.tvProfileName).text = user.fullName
+        dialogView.findViewById<TextView>(R.id.tvProfileEmail).text = user.email
+        dialogView.findViewById<TextView>(R.id.tvProfileRole).text = "Estudiante UniGuajira"
+        dialogView.findViewById<TextView>(R.id.tvProfileUniversity).text = "Universidad de La Guajira"
+        
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setPositiveButton("Aceptar", null)
+            .show()
     }
 
     private fun setupMenuSections(view: View) {
         val container = view.findViewById<LinearLayout>(R.id.menuSectionsContainer)
 
         addSection(container, "PRINCIPAL", listOf(
-            MenuOption("Inicio", R.drawable.ic_home) { /* Ya estamos en main */ },
-            MenuOption("Mi perfil", android.R.drawable.ic_menu_myplaces),
-            MenuOption("Mis publicaciones", R.drawable.ic_edit_note),
-            MenuOption("Favoritos", android.R.drawable.btn_star_big_on),
-            MenuOption("Historial", android.R.drawable.ic_menu_recent_history)
+            MenuOption("Inicio", R.drawable.ic_home) {
+                openFragment(HomeFragment())
+            },
+            MenuOption("Mi perfil", android.R.drawable.ic_menu_myplaces) {
+                startActivity(Intent(requireContext(), ProfileActivity::class.java))
+            },
+            MenuOption("Mis publicaciones", R.drawable.ic_edit_note) {
+                startActivity(Intent(requireContext(), MyProductsActivity::class.java))
+            },
+            MenuOption("Favoritos", android.R.drawable.btn_star_big_on) {
+                startActivity(Intent(requireContext(), FavoritesActivity::class.java))
+            },
+            MenuOption("Historial", android.R.drawable.ic_menu_recent_history) {
+                startActivity(Intent(requireContext(), ViewHistoryActivity::class.java))
+            }
         ))
 
         addSection(container, "ACTIVIDAD", listOf(
-            MenuOption("Productos guardados", R.drawable.ic_cart),
-            MenuOption("Ventas", android.R.drawable.ic_menu_send),
-            MenuOption("Compras", android.R.drawable.ic_menu_agenda),
-            MenuOption("Notificaciones", R.drawable.ic_notifications)
+            MenuOption("Productos guardados", R.drawable.ic_cart) {
+                openFragment(CartFragment())
+            },
+            MenuOption("Ventas", android.R.drawable.ic_menu_send) {
+                startActivity(Intent(requireContext(), MySalesActivity::class.java))
+            },
+            MenuOption("Compras", android.R.drawable.ic_menu_agenda) {
+                startActivity(Intent(requireContext(), MyPurchasesActivity::class.java))
+            },
+            MenuOption("Notificaciones", R.drawable.ic_notifications) {
+                startActivity(Intent(requireContext(), NotificationsActivity::class.java))
+            }
         ))
 
         addSection(container, "MARKETPLACE", listOf(
-            MenuOption("Categorías", R.drawable.ic_categories),
+            MenuOption("Categorías", R.drawable.ic_categories) {
+                openFragment(CategoriesFragment())
+            },
             MenuOption("Publicar producto", android.R.drawable.ic_input_add) {
                 startActivity(Intent(requireContext(), PublishProductActivity::class.java))
             },
-            MenuOption("Mis productos", R.drawable.ic_school)
+            MenuOption("Mis productos", R.drawable.ic_school) {
+                startActivity(Intent(requireContext(), MyProductsActivity::class.java))
+            }
         ))
 
         addSection(container, "UNIVERSIDAD", listOf(
-            MenuOption("Artículos académicos", R.drawable.ic_book),
-            MenuOption("Libros", R.drawable.ic_book),
-            MenuOption("Laboratorio", R.drawable.ic_science),
-            MenuOption("Batas y Uniformes", R.drawable.ic_school)
+            MenuOption("Artículos académicos", R.drawable.ic_book) {
+                openCategory(getString(R.string.cat_notes))
+            },
+            MenuOption("Libros", R.drawable.ic_book) {
+                openCategory(getString(R.string.cat_books))
+            },
+            MenuOption("Laboratorio", R.drawable.ic_science) {
+                openCategory(getString(R.string.cat_lab))
+            },
+            MenuOption("Batas y Uniformes", R.drawable.ic_school) {
+                openCategory(getString(R.string.cat_supplies))
+            }
         ))
 
         addSection(container, "CONFIGURACIÓN", listOf(

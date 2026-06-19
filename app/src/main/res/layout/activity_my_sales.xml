@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- Header / App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        app:elevation="4dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:navigationIconTint="@color/white"
+            app:title="Mis Ventas"
+            app:titleCentered="true"
+            app:titleTextColor="@color/white" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <!-- Dashboard Panel -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Resumen de Ventas"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- Fila Principal: Total Generado -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:background="@color/primary_light"
+                            android:padding="12dp"
+                            android:layout_marginBottom="16dp"
+                            android:backgroundTint="#1F2E7D32"> <!-- 12% alpha green -->
+
+                            <ImageView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:src="@android:drawable/ic_menu_send"
+                                app:tint="@color/primary" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_marginStart="12dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Total Generado"
+                                    android:textColor="@color/gray_text"
+                                    android:textSize="12sp" />
+
+                                <TextView
+                                    android:id="@+id/tvDashboardTotal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="$ 0"
+                                    android:textColor="@color/primary"
+                                    android:textSize="22sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Fila con 3 estadísticas secundarias -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="3">
+
+                            <!-- Ventas realizadas -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <TextView
+                                    android:id="@+id/tvDashboardCountRealized"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="@color/black"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Realizadas"
+                                    android:textColor="@color/gray_text"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center" />
+                            </LinearLayout>
+
+                            <!-- Ventas pendientes -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <TextView
+                                    android:id="@+id/tvDashboardCountPending"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="#F57C00"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Pendientes"
+                                    android:textColor="@color/gray_text"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center" />
+                            </LinearLayout>
+
+                            <!-- Ventas completadas -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center">
+
+                                <TextView
+                                    android:id="@+id/tvDashboardCountCompleted"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="#388E3C"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Completadas"
+                                    android:textColor="@color/gray_text"
+                                    android:textSize="11sp"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="center" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- List / Container -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvMySales"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clipToPadding="false"
+                        tools:listitem="@layout/item_my_product" />
+
+                    <!-- Empty State -->
+                    <TextView
+                        android:id="@+id/tvEmptyState"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="No tienes ventas registradas"
+                        android:textColor="@color/gray_text"
+                        android:textSize="16sp"
+                        android:visibility="gone"
+                        android:padding="32dp" />
+                </FrameLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</LinearLayout>

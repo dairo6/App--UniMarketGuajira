@@ -2,26 +2,26 @@ package com.example.unimarketguajira.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.Fragment
 import com.example.unimarketguajira.R
-import com.example.unimarketguajira.adapters.ProductAdapter
-import com.example.unimarketguajira.models.Product
-import com.example.unimarketguajira.repository.ProductRepository
-import com.example.unimarketguajira.services.UserManager
+import com.example.unimarketguajira.fragments.CartFragment
+import com.example.unimarketguajira.fragments.CategoriesFragment
+import com.example.unimarketguajira.fragments.HomeFragment
+import com.example.unimarketguajira.fragments.MenuFragment
+import com.google.android.material.bottomappbar.BottomAppBar
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -29,41 +29,56 @@ class MainActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, 0, systemBars.right, 0) // El padding inferior lo maneja el BottomNav
+            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom)
             insets
         }
         
-        setupCategories()
-        setupProducts()
         setupBottomNavigation()
+        
+        // Listener para actualizar la UI cuando se vuelve atrás
+        supportFragmentManager.addOnBackStackChangedListener {
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+            currentFragment?.let { 
+                updateUIState(it)
+                syncBottomNavSelection(it)
+            }
+        }
+        
+        // Asegurar que el repositorio tenga datos
+        lifecycleScope.launch {
+            com.example.unimarketguajira.repository.ProductRepository.getAllProducts(this@MainActivity)
+        }
+        
+        // Cargar fragment inicial
+        if (savedInstanceState == null) {
+            replaceFragment(HomeFragment())
+        }
 
         findViewById<FloatingActionButton>(R.id.fabAddProduct).setOnClickListener {
             startActivity(Intent(this, PublishProductActivity::class.java))
         }
     }
 
+    // Eliminamos initDefaultProducts de aquí, ya que ahora reside en el Repository
+
     private fun setupBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    val categoriesContainer = findViewById<LinearLayout>(R.id.categoriesContainer)
-                    for (i in 0 until categoriesContainer.childCount) {
-                        categoriesContainer.getChildAt(i).alpha = 1.0f
-                    }
-                    findViewById<RecyclerView>(R.id.rvProducts).adapter = ProductAdapter(allProducts)
+                    replaceFragment(HomeFragment())
                     true
                 }
                 R.id.nav_categories -> {
-                    Toast.makeText(this, "Categorías próximamente", Toast.LENGTH_SHORT).show()
+                    replaceFragment(CategoriesFragment())
                     true
                 }
                 R.id.nav_cart -> {
-                    Toast.makeText(this, "Carrito próximamente", Toast.LENGTH_SHORT).show()
+                    replaceFragment(CartFragment())
                     true
                 }
                 R.id.nav_menu -> {
-                    showOptionsMenu()
+                    replaceFragment(MenuFragment())
                     true
                 }
                 R.id.nav_placeholder -> false
@@ -72,89 +87,57 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showOptionsMenu() {
-        val options = arrayOf("Mi Perfil", "Mis Publicaciones", "Cerrar Sesión")
-        AlertDialog.Builder(this)
-            .setTitle("Opciones")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show()
-                    1 -> Toast.makeText(this, "Mis publicaciones próximamente", Toast.LENGTH_SHORT).show()
-                    2 -> logout()
-                }
-            }
-            .show()
+    private fun replaceFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+        
+        // Si no es el Home, lo añadimos a la pila para poder volver atrás
+        if (fragment !is HomeFragment) {
+            transaction.addToBackStack(null)
+        } else {
+            // Si volvemos al Home, limpiamos la pila para evitar bucles
+            supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
+
+        transaction.commit()
+        
+        // Actualizar UI inmediatamente (el listener se encargará de los "atrás")
+        updateUIState(fragment)
     }
 
-    private fun logout() {
-        UserManager.logout(this)
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
-    }
+    private fun updateUIState(fragment: Fragment) {
+        val bottomAppBar = findViewById<BottomAppBar>(R.id.bottomAppBar)
+        val fab = findViewById<FloatingActionButton>(R.id.fabAddProduct)
 
-    private fun setupCategories() {
-        val categoriesContainer = findViewById<LinearLayout>(R.id.categoriesContainer)
-        categoriesContainer.removeAllViews()
-
-        val categories = listOf(
-            Pair(getString(R.string.cat_books), R.drawable.ic_book),
-            Pair(getString(R.string.cat_supplies), R.drawable.ic_school),
-            Pair(getString(R.string.cat_lab), R.drawable.ic_science),
-            Pair(getString(R.string.cat_tech), R.drawable.ic_devices),
-            Pair(getString(R.string.cat_notes), R.drawable.ic_edit_note),
-            Pair(getString(R.string.cat_others), R.drawable.ic_more_horiz)
-        )
-
-        for (category in categories) {
-            val view = layoutInflater.inflate(R.layout.item_category, categoriesContainer, false)
-            view.findViewById<TextView>(R.id.tvCategoryName).text = category.first
-            view.findViewById<ImageView>(R.id.ivCategoryIcon).setImageResource(category.second)
-            
-            view.setOnClickListener {
-                for (i in 0 until categoriesContainer.childCount) {
-                    categoriesContainer.getChildAt(i).alpha = 0.5f
-                }
-                view.alpha = 1.0f
-                filterProductsByCategory(category.first)
-            }
-            
-            categoriesContainer.addView(view)
+        if (fragment is CartFragment) {
+            bottomAppBar.visibility = View.GONE
+            fab.visibility = View.GONE
+        } else {
+            bottomAppBar.visibility = View.VISIBLE
+            fab.visibility = View.VISIBLE
         }
     }
 
-    private var allProducts: List<Product> = listOf()
+    private fun syncBottomNavSelection(fragment: Fragment) {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        val itemId = when (fragment) {
+            is HomeFragment -> R.id.nav_home
+            is CategoriesFragment -> R.id.nav_categories
+            is CartFragment -> R.id.nav_cart
+            is MenuFragment -> R.id.nav_menu
+            else -> null
+        }
+        itemId?.let {
+            bottomNav.menu.findItem(it).isChecked = true
+        }
+    }
 
     override fun onResume() {
         super.onResume()
-        updateProductsList()
-    }
-
-    private fun updateProductsList() {
-        allProducts = ProductRepository.getAllProducts()
-        findViewById<RecyclerView>(R.id.rvProducts).adapter = ProductAdapter(allProducts)
-    }
-
-    private fun setupProducts() {
-        val rvProducts = findViewById<RecyclerView>(R.id.rvProducts)
-        
-        // Grid de 2 columnas
-        rvProducts.layoutManager = GridLayoutManager(this, 2)
-        
-        val initialProducts = listOf(
-            Product(1, "Calculadora TI-Nspire CX II CAS", "Calculadora gráfica avanzada para ingeniería y matemáticas.", 850000.0, "Riohacha", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_tech), getString(R.string.condition_new)),
-            Product(2, "Libro: Cálculo de Stewart 8va Ed.", "Libro esencial para ingeniería. En muy buen estado.", 120000.0, "Maicao", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_books), getString(R.string.condition_used_good), true),
-            Product(3, "Bata de Laboratorio XL", "Bata blanca reglamentaria para laboratorio de química.", 45000.0, "Riohacha", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_lab), getString(R.string.condition_used_like_new)),
-            Product(4, "iPad Air 5ta Gen + Pencil", "Ideal para tomar apuntes digitales. 64GB de almacenamiento.", 2800000.0, "Uribia", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_tech), getString(R.string.condition_used_like_new)),
-            Product(5, "Kit de Drawing Técnico", "Tablero y juego de escuadras profesionales.", 95000.0, "Riohacha", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_supplies), getString(R.string.condition_used_acceptable), true),
-            Product(6, "Apuntes Estructuras de Datos", "Apuntes completos del semestre 2023-2 con ejercicios resueltos.", 15000.0, "Manaure", listOf(R.drawable.ic_launcher_background), getString(R.string.cat_notes), getString(R.string.condition_used_good))
-        )
-
-        ProductRepository.setInitialProducts(initialProducts)
-        updateProductsList()
-    }
-
-    private fun filterProductsByCategory(category: String) {
-        val filtered = allProducts.filter { it.category == category }
-        findViewById<RecyclerView>(R.id.rvProducts).adapter = ProductAdapter(filtered)
+        // Forzar re-cálculo del layout para BottomAppBar y FAB ante cualquier cambio del teclado o ciclo de vida
+        findViewById<View>(R.id.fabAddProduct).postDelayed({
+            findViewById<View>(R.id.bottomAppBar).requestLayout()
+            findViewById<View>(R.id.fabAddProduct).requestLayout()
+        }, 150)
     }
 }

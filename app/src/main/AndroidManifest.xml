@@ -32,6 +32,33 @@
         <activity
             android:name=".activities.ProductDetailActivity"
             android:exported="false" />
+        <activity
+            android:name="com.example.unimarketguajira.activities.MenuActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.MyProductsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.MySalesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.NotificationsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.MyPurchasesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ViewHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.FavoritesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ConfirmPurchaseActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

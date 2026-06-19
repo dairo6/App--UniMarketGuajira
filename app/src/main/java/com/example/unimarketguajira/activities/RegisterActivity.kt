@@ -6,6 +6,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.example.unimarketguajira.R
 import com.example.unimarketguajira.models.User
 import com.example.unimarketguajira.services.UserManager
@@ -45,11 +47,13 @@ class RegisterActivity : AppCompatActivity() {
             }
 
             val newUser = User(name, email, pass)
-            if (UserManager.registerUser(this, newUser)) {
-                Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show()
-                finish()
-            } else {
-                Toast.makeText(this, "El usuario ya existe", Toast.LENGTH_SHORT).show()
+            lifecycleScope.launch {
+                if (UserManager.registerUser(this@RegisterActivity, newUser)) {
+                    Toast.makeText(this@RegisterActivity, "Registro exitoso", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this@RegisterActivity, "El usuario ya existe", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

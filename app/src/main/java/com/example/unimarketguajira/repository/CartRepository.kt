@@ -1,25 +1,33 @@
 package com.example.unimarketguajira.repository
 
+import android.content.Context
+import com.example.unimarketguajira.data.db.UniMarketDatabase
+import com.example.unimarketguajira.data.entities.CartItemEntity
 import com.example.unimarketguajira.models.Product
 
 object CartRepository {
-    private val cartItems = mutableListOf<Product>()
-
-    fun addToCart(product: Product) {
-        cartItems.add(product)
+    suspend fun addToCart(context: Context, product: Product, userEmail: String) {
+        val dao = UniMarketDatabase.getDatabase(context).cartDao()
+        dao.addToCart(CartItemEntity(productId = product.id, userEmail = userEmail))
     }
 
-    fun removeFromCart(product: Product) {
-        cartItems.remove(product)
+    suspend fun removeFromCart(context: Context, product: Product, userEmail: String) {
+        val dao = UniMarketDatabase.getDatabase(context).cartDao()
+        dao.removeFromCart(productId = product.id, userEmail = userEmail)
     }
 
-    fun getCartItems(): List<Product> = ArrayList(cartItems)
-
-    fun getTotal(): Double {
-        return cartItems.sumOf { it.price }
+    suspend fun getCartItems(context: Context, userEmail: String): List<Product> {
+        val dao = UniMarketDatabase.getDatabase(context).cartDao()
+        return dao.getCartProductsForUser(userEmail).map { it.toModel() }
     }
 
-    fun clearCart() {
-        cartItems.clear()
+    suspend fun getTotal(context: Context, userEmail: String): Double {
+        val items = getCartItems(context, userEmail)
+        return items.sumOf { it.price }
+    }
+
+    suspend fun clearCart(context: Context, userEmail: String) {
+        val dao = UniMarketDatabase.getDatabase(context).cartDao()
+        dao.clearCartForUser(userEmail)
     }
 }

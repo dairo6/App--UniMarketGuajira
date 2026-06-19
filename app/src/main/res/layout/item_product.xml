@@ -4,43 +4,62 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="16dp"
     app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/white"
+    android:stateListAnimator="@animator/lift_on_touch"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Fondo sutil de grid o simplemente gris claro -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:background="#D1E8D8"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageView
             android:id="@+id/ivProductImage"
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
-            android:id="@+id/ibFavorite"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/bg_search_bar"
-            android:backgroundTint="#80FFFFFF"
-            android:src="@android:drawable/btn_star_big_off"
+            android:layout_margin="12dp"
+            app:cardCornerRadius="18dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardElevation="4dp"
+            app:strokeWidth="0dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/primary" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/ibFavorite"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@android:drawable/btn_star_big_off"
+                android:scaleType="fitCenter"
+                app:tint="@color/primary" />
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tvProductPrice"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
             android:text="$ 0.00"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -50,12 +69,13 @@
             android:id="@+id/tvProductName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="2"
             android:text="Nombre del Producto"
-            android:textColor="#333333"
-            android:textSize="14sp"
+            android:textColor="@color/black"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -65,11 +85,12 @@
             android:id="@+id/tvCategory"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
             android:text="Categoría"
             android:textColor="@color/primary"
-            android:textSize="11sp"
-            android:textStyle="bold"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvProductName" />
@@ -77,9 +98,9 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -88,10 +109,10 @@
             app:layout_constraintTop_toBottomOf="@id/tvCategory">
 
             <ImageView
-                android:layout_width="12dp"
-                android:layout_height="12dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:src="@android:drawable/ic_menu_mylocation"
-                app:tint="#999999" />
+                app:tint="@color/gray_text" />
 
             <TextView
                 android:id="@+id/tvLocation"
@@ -99,8 +120,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:text="Riohacha"
-                android:textColor="#999999"
-                android:textSize="11sp" />
+                android:textColor="@color/gray_text"
+                android:textSize="12sp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
