@@ -10,5 +10,6 @@ data class Purchase(
     val purchaseDate: Long = 0L,
     val deliveryPoint: String = "",
     val paymentMethod: String = "",
-    val status: String = "PENDING"
+    val status: String = "PENDING",
+    val purchaseStatus: String = "PENDING"
 )

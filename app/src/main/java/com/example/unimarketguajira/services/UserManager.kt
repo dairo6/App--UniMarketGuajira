@@ -5,7 +5,11 @@ import com.example.unimarketguajira.data.db.UniMarketDatabase
 import com.example.unimarketguajira.data.entities.UserEntity
 import com.example.unimarketguajira.models.User
 import com.example.unimarketguajira.utils.NetworkUtils
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
 object UserManager {
@@ -15,28 +19,34 @@ object UserManager {
     suspend fun registerUser(context: Context, user: User): Boolean {
         val userDao = UniMarketDatabase.getDatabase(context).userDao()
 
-        if (NetworkUtils.isNetworkAvailable(context)) {
-            try {
-                val db = FirebaseFirestore.getInstance()
-                val doc = db.collection("users").document(user.email).get().await()
-                if (doc.exists()) {
-                    return false
-                }
-                db.collection("users").document(user.email).set(user).await()
-                // Sync to local database
-                userDao.insertUser(UserEntity.fromModel(user))
-                return true
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            throw Exception("No hay conexión a internet para realizar el registro.")
         }
 
-        // Fallback local registration
-        val existing = userDao.getUserByEmail(user.email)
-        if (existing != null) return false
-
-        userDao.insertUser(UserEntity.fromModel(user))
-        return true
+        try {
+            val auth = FirebaseAuth.getInstance()
+            
+            // 1. Crear usuario en Firebase Authentication
+            val authResult = auth.createUserWithEmailAndPassword(user.email, user.password).await()
+            val firebaseUser = authResult.user ?: throw Exception("Error al crear el usuario en Firebase Authentication.")
+            
+            // 2. Enviar correo de verificación
+            firebaseUser.sendEmailVerification().await()
+            
+            // 3. Guardar información adicional en Firestore
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(user.email).set(user).await()
+            
+            // 4. Sincronizar en Room
+            userDao.insertUser(UserEntity.fromModel(user))
+            
+            // Cerrar sesión inmediatamente para que deban iniciar sesión luego de verificar
+            auth.signOut()
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
+        }
     }
 
     suspend fun loginUser(context: Context, email: String, password: String): User? {
@@ -44,26 +54,40 @@ object UserManager {
 
         if (NetworkUtils.isNetworkAvailable(context)) {
             try {
-                val db = FirebaseFirestore.getInstance()
-                val doc = db.collection("users").document(email).get().await()
-                if (doc.exists()) {
-                    val user = doc.toObject(User::class.java)
-                    if (user != null && user.password == password) {
-                        // Sync to local database
-                        userDao.insertUser(UserEntity.fromModel(user))
-                        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                        prefs.edit().putString(KEY_LOGGED_USER, email).apply()
-                        return user
+                val auth = FirebaseAuth.getInstance()
+                val authResult = auth.signInWithEmailAndPassword(email, password).await()
+                val firebaseUser = authResult.user
+                
+                if (firebaseUser != null) {
+                    // Verificar si el correo ya fue verificado
+                    if (!firebaseUser.isEmailVerified) {
+                        auth.signOut()
+                        throw Exception("Debes verificar tu correo institucional antes de ingresar.")
+                    }
+                    
+                    // Obtener datos del perfil de Firestore
+                    val db = FirebaseFirestore.getInstance()
+                    val doc = db.collection("users").document(email).get().await()
+                    if (doc.exists()) {
+                        val user = doc.toObject(User::class.java)
+                        if (user != null) {
+                            userDao.insertUser(UserEntity.fromModel(user))
+                            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                            prefs.edit().putString(KEY_LOGGED_USER, email).apply()
+                            return user
+                        }
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                throw e
             }
         }
 
+        // Fallback local
         val userEntity = userDao.login(email, password)
         
-        // Initialize admin if needed
+        // Inicializar administrador si es necesario
         if (userEntity == null && email == "admin@unimarket.com" && password == "123456") {
             val adminUser = User("Admin", "admin@unimarket.com", "123456")
             userDao.insertUser(UserEntity.fromModel(adminUser))
@@ -83,6 +107,12 @@ object UserManager {
     fun logout(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().remove(KEY_LOGGED_USER).apply()
+        try {
+            ChatNotificationService.stopListening()
+            FirebaseAuth.getInstance().signOut()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun getLoggedUserEmail(context: Context): String? {
@@ -94,6 +124,12 @@ object UserManager {
         val email = getLoggedUserEmail(context) ?: return null
         val userDao = UniMarketDatabase.getDatabase(context).userDao()
         return userDao.getUserByEmail(email)?.toModel()
+    }
+
+    fun observeLoggedUser(context: Context): Flow<User?> {
+        val email = getLoggedUserEmail(context) ?: return flowOf(null)
+        val userDao = UniMarketDatabase.getDatabase(context).userDao()
+        return userDao.observeUserByEmail(email).map { it?.toModel() }
     }
 
     suspend fun getUserByEmail(context: Context, email: String): User? {

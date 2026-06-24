@@ -20,6 +20,7 @@ import com.example.unimarketguajira.activities.ProfileActivity
 import com.example.unimarketguajira.activities.MyPurchasesActivity
 import com.example.unimarketguajira.activities.ViewHistoryActivity
 import com.example.unimarketguajira.activities.FavoritesActivity
+import com.example.unimarketguajira.activities.ConversationsActivity
 import com.example.unimarketguajira.services.UserManager
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -41,9 +42,24 @@ class MenuFragment : Fragment() {
 
         setupMenuSections(view)
         
+        val tvUserName = view.findViewById<TextView>(R.id.tvUserName)
+        val ivUserProfile = view.findViewById<ImageView>(R.id.ivUserProfile)
+
         viewLifecycleOwner.lifecycleScope.launch {
-            val user = UserManager.getLoggedUser(requireContext())
-            view.findViewById<TextView>(R.id.tvUserName).text = user?.fullName ?: "Estudiante"
+            UserManager.observeLoggedUser(requireContext()).collect { user ->
+                tvUserName.text = user?.fullName ?: "Estudiante"
+                if (user != null && ivUserProfile != null) {
+                    if (user.profilePhotoUrl.isNotEmpty()) {
+                        ivUserProfile.clearColorFilter()
+                        com.bumptech.glide.Glide.with(this@MenuFragment)
+                            .load(user.profilePhotoUrl)
+                            .placeholder(android.R.drawable.ic_menu_myplaces)
+                            .into(ivUserProfile)
+                    } else {
+                        ivUserProfile.setImageResource(android.R.drawable.ic_menu_myplaces)
+                    }
+                }
+            }
         }
         
         return view
@@ -100,14 +116,14 @@ class MenuFragment : Fragment() {
         ))
 
         addSection(container, "ACTIVIDAD", listOf(
-            MenuOption("Productos guardados", R.drawable.ic_cart) {
-                openFragment(CartFragment())
+            MenuOption("Compras", android.R.drawable.ic_menu_agenda) {
+                startActivity(Intent(requireContext(), MyPurchasesActivity::class.java))
             },
             MenuOption("Ventas", android.R.drawable.ic_menu_send) {
                 startActivity(Intent(requireContext(), MySalesActivity::class.java))
             },
-            MenuOption("Compras", android.R.drawable.ic_menu_agenda) {
-                startActivity(Intent(requireContext(), MyPurchasesActivity::class.java))
+            MenuOption("Mensajes", android.R.drawable.sym_action_chat) {
+                startActivity(Intent(requireContext(), ConversationsActivity::class.java))
             },
             MenuOption("Notificaciones", R.drawable.ic_notifications) {
                 startActivity(Intent(requireContext(), NotificationsActivity::class.java))

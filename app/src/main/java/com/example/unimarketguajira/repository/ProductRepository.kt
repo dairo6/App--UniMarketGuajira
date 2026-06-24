@@ -5,6 +5,7 @@ import android.net.Uri
 import com.example.unimarketguajira.R
 import com.example.unimarketguajira.data.db.UniMarketDatabase
 import com.example.unimarketguajira.data.entities.ProductEntity
+import com.example.unimarketguajira.data.entities.UserFavoriteEntity
 import com.example.unimarketguajira.models.Product
 import com.example.unimarketguajira.utils.NetworkUtils
 import com.google.firebase.firestore.FirebaseFirestore
@@ -115,7 +116,8 @@ object ProductRepository {
                     "condition" to finalProduct.condition,
                     "isFavorite" to finalProduct.isFavorite,
                     "ownerEmail" to ownerEmail,
-                    "status" to finalProduct.status
+                    "status" to finalProduct.status,
+                    "stock" to finalProduct.stock
                 )
                 db.collection("products").document(finalProduct.id.toString()).set(firestoreProduct).await()
             } catch (e: Exception) {
@@ -128,14 +130,16 @@ object ProductRepository {
     }
 
     suspend fun getAllProducts(context: Context): List<Product> {
-        val dao = UniMarketDatabase.getDatabase(context).productDao()
+        val db = UniMarketDatabase.getDatabase(context)
+        val dao = db.productDao()
+        val favoriteDao = db.favoriteDao()
+        val loggedEmail = com.example.unimarketguajira.services.UserManager.getLoggedUserEmail(context) ?: ""
 
-        if (NetworkUtils.isNetworkAvailable(context)) {
+        val rawProducts = if (NetworkUtils.isNetworkAvailable(context)) {
+            val productsList = mutableListOf<Product>()
             try {
-                val db = FirebaseFirestore.getInstance()
-                val snapshot = db.collection("products").get().await()
-                val productsList = mutableListOf<Product>()
-
+                val firestore = FirebaseFirestore.getInstance()
+                val snapshot = firestore.collection("products").get().await()
                 for (doc in snapshot.documents) {
                     val id = doc.getLong("id")?.toInt() ?: 0
                     val name = doc.getString("name") ?: ""
@@ -145,42 +149,44 @@ object ProductRepository {
                     val imageUrls = doc.get("imageUrls") as? List<String> ?: emptyList()
                     val category = doc.getString("category") ?: ""
                     val condition = doc.getString("condition") ?: ""
-                    val isFavorite = doc.getBoolean("isFavorite") ?: false
                     val ownerEmail = doc.getString("ownerEmail") ?: "admin@unimarket.com"
                     val status = doc.getString("status") ?: "ACTIVE"
+                    val stock = doc.getLong("stock")?.toInt() ?: 1
 
-                    val product = Product(id, name, description, price, location, imageUrls, category, condition, isFavorite, ownerEmail, status)
+                    val product = Product(id, name, description, price, location, imageUrls, category, condition, false, ownerEmail, status, stock)
                     productsList.add(product)
-
-                    // Sincronizar en Room local
                     dao.insertProduct(ProductEntity.fromModel(product, ownerEmail))
-                }
-
-                if (productsList.isNotEmpty()) {
-                    return productsList.filter { it.status == "ACTIVE" }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            if (productsList.isNotEmpty()) productsList else dao.getAllProducts().map { it.toModel() }
+        } else {
+            var localEntities = dao.getAllProducts()
+            if (localEntities.isEmpty()) {
+                val entities = initialMockProducts.map { ProductEntity.fromModel(it, "admin@unimarket.com") }
+                dao.insertAll(entities)
+                localEntities = dao.getAllProducts()
+            }
+            localEntities.map { it.toModel() }
         }
 
-        // Carga local si no hay internet o falló Firestore
-        var products = dao.getAllProducts()
-        if (products.isEmpty()) {
-            val entities = initialMockProducts.map { ProductEntity.fromModel(it, "admin@unimarket.com") }
-            dao.insertAll(entities)
-            products = dao.getAllProducts()
-        }
-        return products.map { it.toModel() }.filter { it.status == "ACTIVE" }
+        return rawProducts.map { product ->
+            val isFav = if (loggedEmail.isNotEmpty()) favoriteDao.isFavorite(loggedEmail, product.id) else false
+            product.copy(isFavorite = isFav)
+        }.filter { it.status == "ACTIVE" }
     }
     
     suspend fun getProductById(context: Context, id: Int): Product? {
-        val dao = UniMarketDatabase.getDatabase(context).productDao()
+        val db = UniMarketDatabase.getDatabase(context)
+        val dao = db.productDao()
+        val favoriteDao = db.favoriteDao()
+        val loggedEmail = com.example.unimarketguajira.services.UserManager.getLoggedUserEmail(context) ?: ""
 
         if (NetworkUtils.isNetworkAvailable(context)) {
             try {
-                val db = FirebaseFirestore.getInstance()
-                val doc = db.collection("products").document(id.toString()).get().await()
+                val firestore = FirebaseFirestore.getInstance()
+                val doc = firestore.collection("products").document(id.toString()).get().await()
                 if (doc.exists()) {
                     val name = doc.getString("name") ?: ""
                     val description = doc.getString("description") ?: ""
@@ -189,55 +195,84 @@ object ProductRepository {
                     val imageUrls = doc.get("imageUrls") as? List<String> ?: emptyList()
                     val category = doc.getString("category") ?: ""
                     val condition = doc.getString("condition") ?: ""
-                    val isFavorite = doc.getBoolean("isFavorite") ?: false
                     val ownerEmail = doc.getString("ownerEmail") ?: "admin@unimarket.com"
                     val status = doc.getString("status") ?: "ACTIVE"
+                    val stock = doc.getLong("stock")?.toInt() ?: 1
 
-                    val product = Product(id, name, description, price, location, imageUrls, category, condition, isFavorite, ownerEmail, status)
-                    // Sincronizar localmente
+                    val product = Product(id, name, description, price, location, imageUrls, category, condition, false, ownerEmail, status, stock)
                     dao.insertProduct(ProductEntity.fromModel(product, ownerEmail))
-                    return product
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
-        return dao.getProductById(id)?.toModel()
+        val entity = dao.getProductById(id) ?: return null
+        val product = entity.toModel()
+        val isFav = if (loggedEmail.isNotEmpty()) favoriteDao.isFavorite(loggedEmail, product.id) else false
+        return product.copy(isFavorite = isFav)
     }
 
     suspend fun searchProductsLocal(context: Context, query: String): List<Product> {
-        val dao = UniMarketDatabase.getDatabase(context).productDao()
+        val db = UniMarketDatabase.getDatabase(context)
+        val dao = db.productDao()
+        val favoriteDao = db.favoriteDao()
+        val loggedEmail = com.example.unimarketguajira.services.UserManager.getLoggedUserEmail(context) ?: ""
+
         val sqlQuery = "%$query%"
-        return dao.searchProducts(sqlQuery).map { it.toModel() }
+        val localProducts = dao.searchProducts(sqlQuery).map { it.toModel() }
+        
+        return localProducts.map { product ->
+            val isFav = if (loggedEmail.isNotEmpty()) favoriteDao.isFavorite(loggedEmail, product.id) else false
+            product.copy(isFavorite = isFav)
+        }
     }
 
     suspend fun toggleFavorite(context: Context, productId: Int, isFavorite: Boolean) {
-        val dao = UniMarketDatabase.getDatabase(context).productDao()
-        val productEntity = dao.getProductById(productId)
-        if (productEntity != null) {
-            val updated = productEntity.copy(isFavorite = isFavorite)
-            dao.insertProduct(updated)
+        val db = UniMarketDatabase.getDatabase(context)
+        val favoriteDao = db.favoriteDao()
+        val loggedEmail = com.example.unimarketguajira.services.UserManager.getLoggedUserEmail(context) ?: ""
 
-            if (NetworkUtils.isNetworkAvailable(context)) {
-                try {
-                    val db = FirebaseFirestore.getInstance()
-                    db.collection("products").document(productId.toString())
-                        .update("isFavorite", isFavorite).await()
-                } catch (e: Exception) {
-                    e.printStackTrace()
+        if (loggedEmail.isEmpty()) return
+
+        // 1. Guardar localmente en Room
+        if (isFavorite) {
+            favoriteDao.insertFavorite(UserFavoriteEntity(loggedEmail, productId))
+        } else {
+            favoriteDao.deleteFavorite(loggedEmail, productId)
+        }
+
+        // 2. Guardar en Firestore
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            try {
+                val firestore = FirebaseFirestore.getInstance()
+                val docId = "${loggedEmail}_$productId"
+                if (isFavorite) {
+                    val favData = hashMapOf(
+                        "userEmail" to loggedEmail,
+                        "productId" to productId,
+                        "addedAt" to System.currentTimeMillis()
+                    )
+                    firestore.collection("favorites").document(docId).set(favData).await()
+                } else {
+                    firestore.collection("favorites").document(docId).delete().await()
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
 
     suspend fun getMyProducts(context: Context, ownerEmail: String): List<Product> {
-        val dao = UniMarketDatabase.getDatabase(context).productDao()
-        
+        val db = UniMarketDatabase.getDatabase(context)
+        val dao = db.productDao()
+        val favoriteDao = db.favoriteDao()
+        val loggedEmail = com.example.unimarketguajira.services.UserManager.getLoggedUserEmail(context) ?: ""
+
         if (NetworkUtils.isNetworkAvailable(context)) {
             try {
-                val db = FirebaseFirestore.getInstance()
-                val snapshot = db.collection("products").whereEqualTo("ownerEmail", ownerEmail).get().await()
+                val firestore = FirebaseFirestore.getInstance()
+                val snapshot = firestore.collection("products").whereEqualTo("ownerEmail", ownerEmail).get().await()
                 for (doc in snapshot.documents) {
                     val id = doc.getLong("id")?.toInt() ?: 0
                     val name = doc.getString("name") ?: ""
@@ -247,10 +282,10 @@ object ProductRepository {
                     val imageUrls = doc.get("imageUrls") as? List<String> ?: emptyList()
                     val category = doc.getString("category") ?: ""
                     val condition = doc.getString("condition") ?: ""
-                    val isFavorite = doc.getBoolean("isFavorite") ?: false
                     val status = doc.getString("status") ?: "ACTIVE"
+                    val stock = doc.getLong("stock")?.toInt() ?: 1
 
-                    val product = Product(id, name, description, price, location, imageUrls, category, condition, isFavorite, ownerEmail, status)
+                    val product = Product(id, name, description, price, location, imageUrls, category, condition, false, ownerEmail, status, stock)
                     dao.insertProduct(ProductEntity.fromModel(product, ownerEmail))
                 }
             } catch (e: Exception) {
@@ -258,7 +293,66 @@ object ProductRepository {
             }
         }
 
-        return dao.getProductsByOwner(ownerEmail).map { it.toModel() }
+        val myLocalProducts = dao.getProductsByOwner(ownerEmail).map { it.toModel() }
+        return myLocalProducts.map { product ->
+            val isFav = if (loggedEmail.isNotEmpty()) favoriteDao.isFavorite(loggedEmail, product.id) else false
+            product.copy(isFavorite = isFav)
+        }
+    }
+
+    suspend fun getFavoritesForUser(context: Context, userEmail: String): List<Product> {
+        val db = UniMarketDatabase.getDatabase(context)
+        val favoriteDao = db.favoriteDao()
+        val productDao = db.productDao()
+
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            try {
+                val firestore = FirebaseFirestore.getInstance()
+                val snapshot = firestore.collection("favorites")
+                    .whereEqualTo("userEmail", userEmail)
+                    .get().await()
+
+                for (doc in snapshot.documents) {
+                    val prodId = doc.getLong("productId")?.toInt() ?: 0
+                    if (prodId > 0) {
+                        favoriteDao.insertFavorite(UserFavoriteEntity(userEmail, prodId))
+                        
+                        // Sincronizar el producto desde Firestore (independientemente del estado: activo, inactivo, eliminado, etc.)
+                        val prodDoc = firestore.collection("products").document(prodId.toString()).get().await()
+                        if (prodDoc.exists()) {
+                            val id = prodDoc.getLong("id")?.toInt() ?: 0
+                            val name = prodDoc.getString("name") ?: ""
+                            val description = prodDoc.getString("description") ?: ""
+                            val price = prodDoc.getDouble("price") ?: 0.0
+                            val location = prodDoc.getString("location") ?: ""
+                            val imageUrls = prodDoc.get("imageUrls") as? List<String> ?: emptyList()
+                            val category = prodDoc.getString("category") ?: ""
+                            val condition = prodDoc.getString("condition") ?: ""
+                            val status = prodDoc.getString("status") ?: "ACTIVE"
+                            val owner = prodDoc.getString("ownerEmail") ?: ""
+                            val stock = prodDoc.getLong("stock")?.toInt() ?: 1
+
+                            val product = Product(id, name, description, price, location, imageUrls, category, condition, true, owner, status, stock)
+                            productDao.insertProduct(ProductEntity.fromModel(product, owner))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        val favoriteIds = favoriteDao.getFavoriteProductIds(userEmail)
+        val products = mutableListOf<Product>()
+        for (id in favoriteIds) {
+            val entity = productDao.getProductById(id)
+            if (entity != null) {
+                val model = entity.toModel()
+                model.isFavorite = true
+                products.add(model)
+            }
+        }
+        return products
     }
 
     suspend fun updateProductStatus(context: Context, productId: Int, newStatus: String) {
@@ -301,7 +395,8 @@ object ProductRepository {
                     "condition" to finalProduct.condition,
                     "isFavorite" to finalProduct.isFavorite,
                     "ownerEmail" to ownerEmail,
-                    "status" to finalProduct.status
+                    "status" to finalProduct.status,
+                    "stock" to finalProduct.stock
                 )
                 db.collection("products").document(finalProduct.id.toString()).set(firestoreProduct).await()
             } catch (e: Exception) {

@@ -11,20 +11,27 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import android.content.Intent
 import com.example.unimarketguajira.R
 import com.example.unimarketguajira.adapters.ImageCarouselAdapter
+import com.example.unimarketguajira.adapters.HorizontalProductAdapter
 import com.example.unimarketguajira.models.Product
 import com.example.unimarketguajira.repository.ProductRepository
+import com.example.unimarketguajira.repository.ChatRepository
 import com.example.unimarketguajira.services.UserManager
 import com.example.unimarketguajira.repository.CartRepository
 import com.example.unimarketguajira.repository.PurchaseRepository
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import com.example.unimarketguajira.data.db.UniMarketDatabase
 import java.text.NumberFormat
 import java.util.Locale
+import android.widget.Toast
 
 class ProductDetailActivity : AppCompatActivity() {
 
     private var currentProduct: Product? = null
+    private var cartMenu: android.view.Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,11 +104,13 @@ class ProductDetailActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.tvDetailPrice).text = formatter.format(dbProduct.price)
 
                 setupGallery(dbProduct.imageUrls)
-                setupSellerInfo(dbProduct.ownerEmail)
+                setupSellerInfo(dbProduct.ownerEmail, dbProduct.id, dbProduct.name)
+                setupMoreSellerProducts(dbProduct.ownerEmail, dbProduct.id)
                 setupFavoriteStatus(dbProduct)
             } else {
                 // Si no se encuentra en BD local, usar fallback
-                setupSellerInfo("admin@unimarket.com")
+                setupSellerInfo("admin@unimarket.com", productId, name)
+                setupMoreSellerProducts("admin@unimarket.com", productId)
                 val fallbackProduct = Product(productId, name, description, price, location, initialImages, category, condition, isFavoriteIntent)
                 setupFavoriteStatus(fallbackProduct)
             }
@@ -118,12 +127,20 @@ class ProductDetailActivity : AppCompatActivity() {
                 imageUrls = initialImages,
                 category = category,
                 condition = condition,
-                isFavorite = isFavoriteIntent
+                isFavorite = isFavoriteIntent,
+                stock = 1
             )
             lifecycleScope.launch {
                 val email = UserManager.getLoggedUserEmail(this@ProductDetailActivity) ?: return@launch
-                CartRepository.addToCart(this@ProductDetailActivity, productToBuy, email)
-                android.widget.Toast.makeText(this@ProductDetailActivity, "¡Agregado al carrito!", android.widget.Toast.LENGTH_SHORT).show()
+                val currentCart = CartRepository.getCartItems(this@ProductDetailActivity, email)
+                val countInCart = currentCart.count { it.id == productToBuy.id }
+                if (countInCart >= productToBuy.stock) {
+                    Toast.makeText(this@ProductDetailActivity, "Stock máximo alcanzado", Toast.LENGTH_SHORT).show()
+                } else {
+                    CartRepository.addToCart(this@ProductDetailActivity, productToBuy, email)
+                    Toast.makeText(this@ProductDetailActivity, "¡Agregado al carrito!", Toast.LENGTH_SHORT).show()
+                    updateCartBadgeCount()
+                }
             }
         }
     }
@@ -167,7 +184,7 @@ class ProductDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupSellerInfo(ownerEmail: String) {
+    private fun setupSellerInfo(ownerEmail: String, productId: Int, productName: String) {
         val tvSellerName = findViewById<TextView>(R.id.tvSellerName)
         val tvSellerEmail = findViewById<TextView>(R.id.tvSellerEmail)
         
@@ -182,21 +199,97 @@ class ProductDetailActivity : AppCompatActivity() {
                 tvSellerName.text = seller.fullName
                 tvSellerEmail.text = seller.email
             }
+
+            // Verificar si ya existe una conversación activa para este producto
+            val loggedEmail = UserManager.getLoggedUserEmail(this@ProductDetailActivity)
+            if (loggedEmail != null && loggedEmail != ownerEmail) {
+                try {
+                    var exists = false
+                    if (com.example.unimarketguajira.utils.NetworkUtils.isNetworkAvailable(this@ProductDetailActivity)) {
+                        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                        val snap = db.collection("chats")
+                            .whereEqualTo("id_comprador", loggedEmail)
+                            .whereEqualTo("id_vendedor", ownerEmail)
+                            .whereEqualTo("id_producto", productId)
+                            .get()
+                            .await()
+                        exists = !snap.isEmpty
+                    }
+                    if (!exists) {
+                        val localDao = UniMarketDatabase.getDatabase(this@ProductDetailActivity).chatRoomDao()
+                        val localChats = localDao.getChatRoomsForUser(loggedEmail)
+                        exists = localChats.any {
+                            it.id_comprador == loggedEmail && it.id_vendedor == ownerEmail && it.id_producto == productId
+                        }
+                    }
+                    if (exists) {
+                        findViewById<View>(R.id.cardActiveChatBanner).visibility = View.VISIBLE
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
 
-        // Configurar botones de contacto
-        val contactAction = View.OnClickListener {
-            val email = tvSellerEmail.text.toString()
-            val name = tvSellerName.text.toString()
-            
-            androidx.appcompat.app.AlertDialog.Builder(this@ProductDetailActivity)
-                .setTitle("Contacto del Vendedor")
-                .setMessage("Nombre: $name\nCorreo: $email\n\nEl chat interno estará disponible en la próxima actualización.")
-                .setPositiveButton("Aceptar", null)
-                .show()
+        // Configurar botón de contacto en barra fija inferior
+        findViewById<View>(R.id.btnContactSeller).setOnClickListener {
+            val loggedEmail = UserManager.getLoggedUserEmail(this@ProductDetailActivity)
+            if (loggedEmail == null) {
+                android.widget.Toast.makeText(this@ProductDetailActivity, "Debes iniciar sesión para contactar al vendedor", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (loggedEmail == ownerEmail) {
+                android.widget.Toast.makeText(this@ProductDetailActivity, "No puedes chatear contigo mismo", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            lifecycleScope.launch {
+                try {
+                    val progressDialog = android.app.ProgressDialog(this@ProductDetailActivity).apply {
+                        setMessage("Conectando con el vendedor...")
+                        setCancelable(false)
+                        show()
+                    }
+                    val chatRoom = ChatRepository.getOrCreateChatRoom(
+                        context = this@ProductDetailActivity,
+                        idComprador = loggedEmail,
+                        idVendedor = ownerEmail,
+                        idProducto = productId
+                    )
+                    progressDialog.dismiss()
+
+                    val intent = Intent(this@ProductDetailActivity, ChatActivity::class.java).apply {
+                        putExtra("CHAT_ID", chatRoom.id)
+                        putExtra("ID_COMPRADOR", chatRoom.id_comprador)
+                        putExtra("ID_VENDEDOR", chatRoom.id_vendedor)
+                        putExtra("ID_PRODUCTO", chatRoom.id_producto)
+                        putExtra("PRODUCT_NAME", productName)
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    android.widget.Toast.makeText(this@ProductDetailActivity, "Error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
         }
-        findViewById<View>(R.id.btnContactSeller).setOnClickListener(contactAction)
-        findViewById<View>(R.id.btnContactSellerInline).setOnClickListener(contactAction)
+    }
+
+    private fun setupMoreSellerProducts(ownerEmail: String, currentProductId: Int) {
+        val cardMoreSellerProducts = findViewById<View>(R.id.cardMoreSellerProducts)
+        val rvMoreSellerProducts = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvMoreSellerProducts)
+
+        lifecycleScope.launch {
+            val allSellerProducts = ProductRepository.getMyProducts(this@ProductDetailActivity, ownerEmail)
+            val otherSellerProducts = allSellerProducts.filter { it.id != currentProductId && it.status == "ACTIVE" }
+
+            if (otherSellerProducts.isNotEmpty()) {
+                cardMoreSellerProducts.visibility = View.VISIBLE
+                val adapter = HorizontalProductAdapter(this@ProductDetailActivity, otherSellerProducts)
+                rvMoreSellerProducts.adapter = adapter
+            } else {
+                cardMoreSellerProducts.visibility = View.GONE
+            }
+        }
     }
 
     private fun setupFavoriteStatus(product: Product) {
@@ -233,6 +326,51 @@ class ProductDetailActivity : AppCompatActivity() {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateCartBadgeCount()
+    }
+
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_cart, menu)
+        cartMenu = menu
+
+        val cartItem = menu.findItem(R.id.action_cart)
+        val actionView = cartItem?.actionView
+        actionView?.findViewById<View>(R.id.cart_badge_container)?.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                putExtra("OPEN_CART", true)
+                putExtra("CALLING_ACTIVITY", this@ProductDetailActivity::class.java.name)
+                flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            }
+            startActivity(intent)
+        }
+
+        updateCartBadgeCount()
+        return true
+    }
+
+    private fun updateCartBadgeCount() {
+        lifecycleScope.launch {
+            val email = UserManager.getLoggedUserEmail(this@ProductDetailActivity) ?: return@launch
+            val cartItems = CartRepository.getCartItems(this@ProductDetailActivity, email)
+            val totalQuantity = cartItems.size
+
+            val menu = cartMenu ?: return@launch
+            val cartItem = menu.findItem(R.id.action_cart) ?: return@launch
+            val actionView = cartItem.actionView ?: return@launch
+            val badgeCard = actionView.findViewById<View>(R.id.cardCartBadge)
+            val badgeText = actionView.findViewById<TextView>(R.id.tvCartBadge)
+
+            if (totalQuantity > 0) {
+                badgeText.text = totalQuantity.toString()
+                badgeCard.visibility = View.VISIBLE
+            } else {
+                badgeCard.visibility = View.GONE
             }
         }
     }

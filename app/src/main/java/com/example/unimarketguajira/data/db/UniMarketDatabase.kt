@@ -15,9 +15,15 @@ import com.example.unimarketguajira.data.entities.UserEntity
 import com.example.unimarketguajira.data.entities.PurchaseEntity
 import com.example.unimarketguajira.data.entities.NotificationEntity
 import com.example.unimarketguajira.data.entities.ProductViewHistoryEntity
+import com.example.unimarketguajira.data.entities.UserFavoriteEntity
+import com.example.unimarketguajira.data.entities.ChatRoomEntity
+import com.example.unimarketguajira.data.entities.MessageEntity
 import com.example.unimarketguajira.data.daos.PurchaseDao
 import com.example.unimarketguajira.data.daos.NotificationDao
 import com.example.unimarketguajira.data.daos.ProductViewHistoryDao
+import com.example.unimarketguajira.data.daos.FavoriteDao
+import com.example.unimarketguajira.data.daos.ChatRoomDao
+import com.example.unimarketguajira.data.daos.MessageDao
 
 @Database(
     entities = [
@@ -26,9 +32,12 @@ import com.example.unimarketguajira.data.daos.ProductViewHistoryDao
         CartItemEntity::class,
         PurchaseEntity::class,
         NotificationEntity::class,
-        ProductViewHistoryEntity::class
+        ProductViewHistoryEntity::class,
+        UserFavoriteEntity::class,
+        ChatRoomEntity::class,
+        MessageEntity::class
     ],
-    version = 6,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -39,6 +48,9 @@ abstract class UniMarketDatabase : RoomDatabase() {
     abstract fun purchaseDao(): PurchaseDao
     abstract fun notificationDao(): NotificationDao
     abstract fun productViewHistoryDao(): ProductViewHistoryDao
+    abstract fun favoriteDao(): FavoriteDao
+    abstract fun chatRoomDao(): ChatRoomDao
+    abstract fun messageDao(): MessageDao
 
     companion object {
         @Volatile

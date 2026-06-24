@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cart_badge_container"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:minWidth="48dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackgroundBorderless">
+
+    <ImageView
+        android:id="@+id/ivCartIcon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="center"
+        android:contentDescription="Carrito de compras"
+        android:src="@drawable/ic_cart"
+        app:tint="@color/white" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardCartBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:minWidth="18dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="4dp"
+        app:cardBackgroundColor="#E53935"
+        app:cardCornerRadius="9dp"
+        app:strokeColor="@color/white"
+        app:strokeWidth="1dp"
+        app:cardElevation="0dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvCartBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="0"
+            android:textColor="@color/white"
+            android:textSize="9sp"
+            android:paddingHorizontal="4dp"
+            android:gravity="center"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

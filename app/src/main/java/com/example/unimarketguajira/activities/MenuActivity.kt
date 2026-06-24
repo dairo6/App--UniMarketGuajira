@@ -50,9 +50,24 @@ class MenuActivity : AppCompatActivity() {
             startActivity(Intent(this, PublishProductActivity::class.java))
         }
         
+        val tvUserName = findViewById<TextView>(R.id.tvUserName)
+        val ivUserProfile = findViewById<ImageView>(R.id.ivUserProfile)
+
         lifecycleScope.launch {
-            val user = UserManager.getLoggedUser(this@MenuActivity)
-            findViewById<TextView>(R.id.tvUserName).text = user?.fullName ?: "Estudiante"
+            UserManager.observeLoggedUser(this@MenuActivity).collect { user ->
+                tvUserName.text = user?.fullName ?: "Estudiante"
+                if (user != null && ivUserProfile != null) {
+                    if (user.profilePhotoUrl.isNotEmpty()) {
+                        ivUserProfile.clearColorFilter()
+                        com.bumptech.glide.Glide.with(this@MenuActivity)
+                            .load(user.profilePhotoUrl)
+                            .placeholder(android.R.drawable.ic_menu_myplaces)
+                            .into(ivUserProfile)
+                    } else {
+                        ivUserProfile.setImageResource(android.R.drawable.ic_menu_myplaces)
+                    }
+                }
+            }
         }
     }
 
@@ -100,14 +115,14 @@ class MenuActivity : AppCompatActivity() {
         ))
 
         addSection(container, "ACTIVIDAD", listOf(
-            MenuOption("Productos guardados", R.drawable.ic_cart) {
-                startActivity(Intent(this, FavoritesActivity::class.java))
+            MenuOption("Compras", android.R.drawable.ic_menu_agenda) {
+                startActivity(Intent(this, MyPurchasesActivity::class.java))
             },
             MenuOption("Ventas", android.R.drawable.ic_menu_send) {
                 startActivity(Intent(this, MySalesActivity::class.java))
             },
-            MenuOption("Compras", android.R.drawable.ic_menu_agenda) {
-                startActivity(Intent(this, MyPurchasesActivity::class.java))
+            MenuOption("Mensajes", android.R.drawable.sym_action_chat) {
+                startActivity(Intent(this, ConversationsActivity::class.java))
             },
             MenuOption("Notificaciones", R.drawable.ic_notifications) {
                 startActivity(Intent(this, NotificationsActivity::class.java))

@@ -19,6 +19,8 @@ import com.example.unimarketguajira.repository.PurchaseRepository
 import com.example.unimarketguajira.services.UserManager
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import com.example.unimarketguajira.data.db.UniMarketDatabase
 
 class NotificationsActivity : AppCompatActivity() {
 
@@ -142,6 +144,32 @@ class NotificationsActivity : AppCompatActivity() {
                     filterAndDisplay()
                 } catch (e: Exception) {
                     e.printStackTrace()
+                }
+            }
+
+            // Si es una notificación de chat, abrir el chat correspondiente
+            if (notification.type == "CHAT" && notification.chatId.isNotEmpty()) {
+                val chatDao = UniMarketDatabase.getDatabase(this@NotificationsActivity).chatRoomDao()
+                var chatRoom = chatDao.getChatRoomById(notification.chatId)?.toModel()
+                if (chatRoom == null && com.example.unimarketguajira.utils.NetworkUtils.isNetworkAvailable(this@NotificationsActivity)) {
+                    try {
+                        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                        val doc = db.collection("chats").document(notification.chatId).get().await()
+                        chatRoom = doc.toObject(com.example.unimarketguajira.models.ChatRoom::class.java)?.copy(id = doc.id)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                if (chatRoom != null) {
+                    val intent = Intent(this@NotificationsActivity, ChatActivity::class.java).apply {
+                        putExtra("CHAT_ID", chatRoom.id)
+                        putExtra("ID_COMPRADOR", chatRoom.id_comprador)
+                        putExtra("ID_VENDEDOR", chatRoom.id_vendedor)
+                        putExtra("ID_PRODUCTO", chatRoom.id_producto)
+                        putExtra("PRODUCT_NAME", "UniMarket Producto")
+                    }
+                    startActivity(intent)
+                    return@launch
                 }
             }
 

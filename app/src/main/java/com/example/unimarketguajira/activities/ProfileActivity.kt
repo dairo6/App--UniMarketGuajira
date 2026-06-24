@@ -163,23 +163,24 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun loadProfileData() {
         lifecycleScope.launch {
-            val user = UserManager.getLoggedUser(this@ProfileActivity)
-            if (user != null) {
-                tvProfileName.text = user.fullName
-                tvProfileEmail.text = user.email
-                tvProfileRole.text = if (user.role.isNotEmpty()) user.role else "Estudiante"
-                tvProfilePhone.text = if (user.phoneNumber.isNotEmpty()) user.phoneNumber else "Sin teléfono registrado"
-                tvProfileUniversity.text = if (user.university.isNotEmpty()) user.university else "Universidad de La Guajira"
+            UserManager.observeLoggedUser(this@ProfileActivity).collect { user ->
+                if (user != null) {
+                    tvProfileName.text = user.fullName
+                    tvProfileEmail.text = user.email
+                    tvProfileRole.text = if (user.role.isNotEmpty()) user.role else "Estudiante"
+                    tvProfilePhone.text = if (user.phoneNumber.isNotEmpty()) user.phoneNumber else "Sin teléfono registrado"
+                    tvProfileUniversity.text = if (user.university.isNotEmpty()) user.university else "Universidad de La Guajira"
 
-                if (user.profilePhotoUrl.isNotEmpty()) {
-                    ivProfilePhoto.clearColorFilter()
-                    Glide.with(this@ProfileActivity)
-                        .load(user.profilePhotoUrl)
-                        .placeholder(android.R.drawable.ic_menu_myplaces)
-                        .into(ivProfilePhoto)
-                } else {
-                    ivProfilePhoto.setImageResource(android.R.drawable.ic_menu_myplaces)
-                    ivProfilePhoto.setColorFilter(getColor(R.color.primary))
+                    if (user.profilePhotoUrl.isNotEmpty()) {
+                        ivProfilePhoto.clearColorFilter()
+                        Glide.with(this@ProfileActivity)
+                            .load(user.profilePhotoUrl)
+                            .placeholder(android.R.drawable.ic_menu_myplaces)
+                            .into(ivProfilePhoto)
+                    } else {
+                        ivProfilePhoto.setImageResource(android.R.drawable.ic_menu_myplaces)
+                        ivProfilePhoto.setColorFilter(getColor(R.color.primary))
+                    }
                 }
             }
         }
@@ -374,10 +375,32 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun uploadProfilePhoto(uri: Uri) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_upload_progress, null)
+        val progressIndicator = dialogView.findViewById<com.google.android.material.progressindicator.LinearProgressIndicator>(R.id.progressIndicator)
+        val tvUploadPercentage = dialogView.findViewById<TextView>(R.id.tvUploadPercentage)
+        val tvUploadStatus = dialogView.findViewById<TextView>(R.id.tvUploadStatus)
+
+        tvUploadStatus.text = "Subiendo foto..."
+        progressIndicator.progress = 0
+        tvUploadPercentage.text = "0%"
+
+        val progressDialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setCancelable(false)
+            .setView(dialogView)
+            .create()
+
+        progressDialog.show()
+
         val storageRef = FirebaseStorage.getInstance().reference.child("profiles/$userEmail.jpg")
-        Toast.makeText(this, "Subiendo foto...", Toast.LENGTH_SHORT).show()
 
         storageRef.putFile(uri)
+            .addOnProgressListener { taskSnapshot ->
+                val progress = ((100.0 * taskSnapshot.bytesTransferred) / taskSnapshot.totalByteCount).toInt()
+                runOnUiThread {
+                    progressIndicator.progress = progress
+                    tvUploadPercentage.text = "$progress%"
+                }
+            }
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                     val photoUrl = downloadUri.toString()
@@ -387,8 +410,9 @@ class ProfileActivity : AppCompatActivity() {
                             val updatedUser = user.copy(profilePhotoUrl = photoUrl)
                             val success = UserManager.updateUser(this@ProfileActivity, updatedUser)
                             if (success) {
-                                Toast.makeText(this@ProfileActivity, "Foto de perfil actualizada", Toast.LENGTH_SHORT).show()
-                                loadProfileData()
+                                progressDialog.dismiss()
+                                Toast.makeText(this@ProfileActivity, "Foto actualizada correctamente.", Toast.LENGTH_LONG).show()
+                                
                                 PurchaseRepository.createSystemNotification(
                                     context = this@ProfileActivity,
                                     userId = userEmail,
@@ -397,14 +421,21 @@ class ProfileActivity : AppCompatActivity() {
                                     type = "SISTEMA",
                                     relatedProductId = 0
                                 )
+                            } else {
+                                progressDialog.dismiss()
+                                Toast.makeText(this@ProfileActivity, "Error al guardar la URL de la foto en la base de datos.", Toast.LENGTH_SHORT).show()
                             }
+                        } else {
+                            progressDialog.dismiss()
                         }
                     }
                 }.addOnFailureListener {
+                    progressDialog.dismiss()
                     Toast.makeText(this, "Error al obtener URL de descarga", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener { e ->
+                progressDialog.dismiss()
                 Toast.makeText(this, "Error al subir foto: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }

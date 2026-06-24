@@ -15,9 +15,10 @@ data class PurchaseEntity(
     val purchaseDate: Long,
     val deliveryPoint: String,
     val paymentMethod: String,
-    val status: String
+    val status: String,
+    val purchaseStatus: String = "PENDING"
 ) {
-    fun toModel() = Purchase(id, productId, sellerId, buyerId, price, quantity, purchaseDate, deliveryPoint, paymentMethod, status)
+    fun toModel() = Purchase(id, productId, sellerId, buyerId, price, quantity, purchaseDate, deliveryPoint, paymentMethod, status, purchaseStatus)
 
     companion object {
         fun fromModel(purchase: Purchase) = PurchaseEntity(
@@ -30,7 +31,8 @@ data class PurchaseEntity(
             purchase.purchaseDate,
             purchase.deliveryPoint,
             purchase.paymentMethod,
-            purchase.status
+            purchase.status,
+            purchase.purchaseStatus
           )
      }
 }

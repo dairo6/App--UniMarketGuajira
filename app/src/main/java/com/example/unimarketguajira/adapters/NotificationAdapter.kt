@@ -82,6 +82,11 @@ class NotificationAdapter(
                     ivIcon.setColorFilter(Color.parseColor("#F57C00")) // Orange
                     cardIconBg.setCardBackgroundColor(Color.parseColor("#FFF3E0"))
                 }
+                "CHAT" -> {
+                    ivIcon.setImageResource(android.R.drawable.sym_action_chat)
+                    ivIcon.setColorFilter(Color.parseColor("#455A64")) // Blue Gray
+                    cardIconBg.setCardBackgroundColor(Color.parseColor("#ECEFF1"))
+                }
                 else -> { // SISTEMA o otros
                     ivIcon.setImageResource(android.R.drawable.ic_popup_reminder)
                     ivIcon.setColorFilter(Color.parseColor("#616161")) // Grey

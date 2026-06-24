@@ -16,23 +16,25 @@ data class ProductEntity(
     val condition: String,
     val isFavorite: Boolean,
     val ownerEmail: String,
-    val status: String = "ACTIVE"
+    val status: String = "ACTIVE",
+    val stock: Int = 1
 ) {
-    fun toModel() = Product(id, name, description, price, location, imageUrls, category, condition, isFavorite, ownerEmail, status)
+    fun toModel() = Product(id, name, description, price, location, imageUrls, category, condition, isFavorite, ownerEmail, status, stock)
     
     companion object {
         fun fromModel(product: Product, ownerEmail: String) = ProductEntity(
-            if (product.id == 0) 0 else product.id,
-            product.name,
-            product.description,
-            product.price,
-            product.location,
-            product.imageUrls,
-            product.category,
-            product.condition,
-            product.isFavorite,
-            ownerEmail,
-            product.status
+            id = if (product.id == 0) 0 else product.id,
+            name = product.name,
+            description = product.description,
+            price = product.price,
+            location = product.location,
+            imageUrls = product.imageUrls,
+            category = product.category,
+            condition = product.condition,
+            isFavorite = product.isFavorite,
+            ownerEmail = ownerEmail,
+            status = product.status,
+            stock = product.stock
         )
     }
 }

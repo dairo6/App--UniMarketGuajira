@@ -8,11 +8,14 @@ import com.example.unimarketguajira.data.entities.UserEntity
 
 @Dao
 interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: UserEntity): Long // Returns -1 if ignored (conflict)
 
     @Query("SELECT * FROM users WHERE email = :email")
     suspend fun getUserByEmail(email: String): UserEntity?
+
+    @Query("SELECT * FROM users WHERE email = :email")
+    fun observeUserByEmail(email: String): kotlinx.coroutines.flow.Flow<UserEntity?>
 
     @Query("SELECT * FROM users WHERE email = :email AND password = :password")
     suspend fun login(email: String, password: String): UserEntity?

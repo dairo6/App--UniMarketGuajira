@@ -16,7 +16,8 @@ data class Product(
     val condition: String,
     var isFavorite: Boolean = false,
     val ownerEmail: String = "",
-    val status: String = "ACTIVE"
+    val status: String = "ACTIVE",
+    val stock: Int = 1
 )
 
 fun ImageView.loadProductImage(imagePath: String?) {

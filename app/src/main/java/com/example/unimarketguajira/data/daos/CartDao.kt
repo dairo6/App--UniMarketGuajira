@@ -20,4 +20,7 @@ interface CartDao {
 
     @Query("DELETE FROM cart_items WHERE userEmail = :userEmail")
     suspend fun clearCartForUser(userEmail: String)
+
+    @Query("SELECT * FROM cart_items WHERE userEmail = :userEmail")
+    suspend fun getCartItemsForUser(userEmail: String): List<CartItemEntity>
 }

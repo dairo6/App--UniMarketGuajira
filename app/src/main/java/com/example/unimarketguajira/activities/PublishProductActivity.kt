@@ -166,8 +166,9 @@ class PublishProductActivity : AppCompatActivity() {
         val condition = findViewById<AutoCompleteTextView>(R.id.spinnerCondition).text.toString()
         val description = findViewById<TextInputEditText>(R.id.etDescription).text.toString().trim()
         val location = findViewById<AutoCompleteTextView>(R.id.spinnerLocation).text.toString()
+        val quantityText = findViewById<TextInputEditText>(R.id.etQuantity).text.toString().trim()
 
-        if (name.isEmpty() || priceText.isEmpty() || category.isEmpty() || condition.isEmpty() || description.isEmpty() || location.isEmpty()) {
+        if (name.isEmpty() || priceText.isEmpty() || category.isEmpty() || condition.isEmpty() || description.isEmpty() || location.isEmpty() || quantityText.isEmpty()) {
             Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
             return
         }
@@ -178,6 +179,7 @@ class PublishProductActivity : AppCompatActivity() {
         }
 
         val price = priceText.toDoubleOrNull() ?: 0.0
+        val stock = quantityText.toIntOrNull() ?: 1
 
         val savedImagePaths = selectedImages.mapNotNull { uri ->
             if (uri.scheme == "file" || uri.scheme == "http" || uri.scheme == "https") {
@@ -218,7 +220,8 @@ class PublishProductActivity : AppCompatActivity() {
                         location = location,
                         imageUrls = savedImagePaths,
                         category = category,
-                        condition = condition
+                        condition = condition,
+                        stock = stock
                     )
                     ProductRepository.updateProduct(this@PublishProductActivity, updatedProduct, email) { progress ->
                         runOnUiThread {
@@ -246,7 +249,8 @@ class PublishProductActivity : AppCompatActivity() {
                         imageUrls = savedImagePaths,
                         category = category,
                         condition = condition,
-                        status = "ACTIVE"
+                        status = "ACTIVE",
+                        stock = stock
                     )
                     ProductRepository.addProduct(this@PublishProductActivity, newProduct, email) { progress ->
                         runOnUiThread {
@@ -286,6 +290,7 @@ class PublishProductActivity : AppCompatActivity() {
                 findViewById<TextInputEditText>(R.id.etProductName).setText(product.name)
                 findViewById<TextInputEditText>(R.id.etPrice).setText(product.price.toString())
                 findViewById<TextInputEditText>(R.id.etDescription).setText(product.description)
+                findViewById<TextInputEditText>(R.id.etQuantity).setText(product.stock.toString())
                 
                 findViewById<AutoCompleteTextView>(R.id.spinnerCategory).setText(product.category, false)
                 findViewById<AutoCompleteTextView>(R.id.spinnerCondition).setText(product.condition, false)

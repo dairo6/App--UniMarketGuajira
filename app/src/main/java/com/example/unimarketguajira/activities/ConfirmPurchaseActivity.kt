@@ -38,6 +38,9 @@ class ConfirmPurchaseActivity : AppCompatActivity() {
     private lateinit var tvConfirmTotal: TextView
     private lateinit var btnPlaceOrder: Button
 
+    private lateinit var tilCustomDeliveryPoint: com.google.android.material.textfield.TextInputLayout
+    private lateinit var etCustomDeliveryPoint: TextInputEditText
+
     private var groupedCartItems: List<CartItem> = emptyList()
     private var buyerEmail = ""
     private var buyerName = ""
@@ -65,6 +68,9 @@ class ConfirmPurchaseActivity : AppCompatActivity() {
         etDeliveryNotes = findViewById(R.id.etDeliveryNotes)
         tvConfirmTotal = findViewById(R.id.tvConfirmTotal)
         btnPlaceOrder = findViewById(R.id.btnPlaceOrder)
+
+        tilCustomDeliveryPoint = findViewById(R.id.tilCustomDeliveryPoint)
+        etCustomDeliveryPoint = findViewById(R.id.etCustomDeliveryPoint)
 
         rvConfirmProducts.layoutManager = LinearLayoutManager(this)
 
@@ -96,6 +102,16 @@ class ConfirmPurchaseActivity : AppCompatActivity() {
         val deliveryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, deliveryPoints)
         spinnerDeliveryPoint.setAdapter(deliveryAdapter)
 
+        spinnerDeliveryPoint.setOnItemClickListener { parent, _, position, _ ->
+            val selected = parent.getItemAtPosition(position).toString()
+            if (selected == "Otro") {
+                tilCustomDeliveryPoint.visibility = View.VISIBLE
+            } else {
+                tilCustomDeliveryPoint.visibility = View.GONE
+                etCustomDeliveryPoint.text?.clear()
+            }
+        }
+
         // Métodos de pago
         val paymentMethods = arrayOf("Pago presencial al recibir", "Transferencia bancaria", "Nequi", "DaviPlata")
         val paymentAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, paymentMethods)
@@ -123,11 +139,17 @@ class ConfirmPurchaseActivity : AppCompatActivity() {
 
     private fun handlePlaceOrder() {
         val deliveryPoint = spinnerDeliveryPoint.text.toString().trim()
+        val customDeliveryPoint = etCustomDeliveryPoint.text.toString().trim()
         val paymentMethod = spinnerPaymentMethod.text.toString().trim()
         val notes = etDeliveryNotes.text.toString().trim()
 
         if (deliveryPoint.isEmpty() || paymentMethod.isEmpty()) {
             Toast.makeText(this, "Completa el punto de encuentro y el método de pago", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (deliveryPoint == "Otro" && customDeliveryPoint.isEmpty()) {
+            Toast.makeText(this, "El punto de encuentro personalizado es obligatorio", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -137,10 +159,28 @@ class ConfirmPurchaseActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            // Guardar transacciones y notificar a cada vendedor involucrado
+            // 1. Validar el stock antes de proceder
+            for (item in groupedCartItems) {
+                val latestProduct = com.example.unimarketguajira.repository.ProductRepository.getProductById(this@ConfirmPurchaseActivity, item.product.id)
+                if (latestProduct == null) {
+                    Toast.makeText(this@ConfirmPurchaseActivity, "El producto ${item.product.name} ya no existe", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+                if (item.quantity > latestProduct.stock) {
+                    Toast.makeText(this@ConfirmPurchaseActivity, "No hay suficientes unidades de ${item.product.name}. Stock disponible: ${latestProduct.stock}", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+                if (latestProduct.status == "SOLD") {
+                    Toast.makeText(this@ConfirmPurchaseActivity, "El producto ${item.product.name} ya está vendido", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+            }
+
+            // 2. Guardar transacciones y notificar a cada vendedor involucrado
             for (item in groupedCartItems) {
                 val purchaseId = "purchase_${System.currentTimeMillis()}_${(0..1000).random()}"
-                val finalDeliveryPoint = if (notes.isNotEmpty()) "$deliveryPoint ($notes)" else deliveryPoint
+                val actualDeliveryPoint = if (deliveryPoint == "Otro") customDeliveryPoint else deliveryPoint
+                val finalDeliveryPoint = if (notes.isNotEmpty()) "$actualDeliveryPoint ($notes)" else actualDeliveryPoint
                 
                 val purchase = Purchase(
                     id = purchaseId,
@@ -152,7 +192,8 @@ class ConfirmPurchaseActivity : AppCompatActivity() {
                     purchaseDate = System.currentTimeMillis(),
                     deliveryPoint = finalDeliveryPoint,
                     paymentMethod = paymentMethod,
-                    status = "PENDING"
+                    status = "PENDING",
+                    purchaseStatus = "PENDING"
                 )
 
                 PurchaseRepository.createPurchase(

@@ -51,20 +51,34 @@ class LoginActivity : AppCompatActivity() {
             }
 
             lifecycleScope.launch {
-                val user = UserManager.loginUser(this@LoginActivity, email, password)
-                if (user != null) {
-                    Toast.makeText(this@LoginActivity, "Bienvenido ${user.fullName}", Toast.LENGTH_SHORT).show()
-                    
-                    // Ocultar el teclado antes de abrir MainActivity para evitar desfases de maquetación en el BottomAppBar
-                    val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                    currentFocus?.let { view ->
-                        imm.hideSoftInputFromWindow(view.windowToken, 0)
-                    }
+                try {
+                    val user = UserManager.loginUser(this@LoginActivity, email, password)
+                    if (user != null) {
+                        try {
+                            com.example.unimarketguajira.repository.CartRepository.syncFirebaseCartToLocal(this@LoginActivity, email)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        Toast.makeText(this@LoginActivity, "Bienvenido ${user.fullName}", Toast.LENGTH_SHORT).show()
+                        
+                        // Ocultar el teclado antes de abrir MainActivity para evitar desfases de maquetación en el BottomAppBar
+                        val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                        currentFocus?.let { view ->
+                            imm.hideSoftInputFromWindow(view.windowToken, 0)
+                        }
 
-                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                    finish()
-                } else {
-                    Toast.makeText(this@LoginActivity, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                        finish()
+                    } else {
+                        Toast.makeText(this@LoginActivity, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    val errorMsg = e.message ?: ""
+                    if (errorMsg.contains("verificar", ignoreCase = true) || errorMsg.contains("verification", ignoreCase = true)) {
+                        Toast.makeText(this@LoginActivity, "Debes verificar tu correo institucional antes de ingresar.", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@LoginActivity, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }

@@ -284,7 +284,11 @@ class CartFragment : Fragment() {
             }
 
             holder.btnQtyIncrease.setOnClickListener {
-                updateCartItemQuantity(cartItem, cartItem.quantity + 1)
+                if (cartItem.quantity >= product.stock) {
+                    Toast.makeText(holder.itemView.context, "Stock máximo alcanzado", Toast.LENGTH_SHORT).show()
+                } else {
+                    updateCartItemQuantity(cartItem, cartItem.quantity + 1)
+                }
             }
 
             holder.btnRemove.setOnClickListener {

@@ -14,9 +14,12 @@ interface NotificationDao {
     @Query("SELECT * FROM notifications WHERE userId = :userId ORDER BY createdAt DESC")
     suspend fun getNotificationsForUser(userId: String): List<NotificationEntity>
     
-    @Query("UPDATE notifications SET isRead = 1 WHERE id = :notificationId")
+    @Query("UPDATE notifications SET isRead = 1 WHERE notificationId = :notificationId")
     suspend fun markAsRead(notificationId: String)
     
     @Query("SELECT COUNT(*) FROM notifications WHERE userId = :userId AND isRead = 0")
     suspend fun getUnreadCount(userId: String): Int
+
+    @Query("SELECT COUNT(*) FROM notifications WHERE userId = :userId AND chatId = :chatId AND isRead = 0")
+    suspend fun getUnreadCountForChat(userId: String, chatId: String): Int
 }

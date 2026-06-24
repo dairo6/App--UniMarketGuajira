@@ -96,8 +96,42 @@ object PurchaseRepository {
 
         val purchaseEntity = purchaseDao.getPurchaseById(purchaseId)
         if (purchaseEntity != null) {
-            val updatedPurchase = purchaseEntity.copy(status = newStatus)
+            val updatedPurchase = purchaseEntity.copy(status = newStatus, purchaseStatus = newStatus)
             purchaseDao.insertPurchase(updatedPurchase)
+
+            // Si la compra es confirmada, reducir el stock del producto
+            if (newStatus == "CONFIRMED") {
+                val productId = purchaseEntity.productId
+                val quantityPurchased = purchaseEntity.quantity
+                
+                val productEntity = db.productDao().getProductById(productId)
+                if (productEntity != null) {
+                    val currentStock = productEntity.stock
+                    val newStock = maxOf(0, currentStock - quantityPurchased)
+                    val newProductStatus = if (newStock == 0) "SOLD" else productEntity.status
+                    
+                    val updatedProductEntity = productEntity.copy(
+                        stock = newStock,
+                        status = newProductStatus
+                    )
+                    db.productDao().insertProduct(updatedProductEntity)
+                    
+                    // Actualizar Firestore
+                    if (NetworkUtils.isNetworkAvailable(context)) {
+                        try {
+                            val firestore = FirebaseFirestore.getInstance()
+                            val productRef = firestore.collection("products").document(productId.toString())
+                            val updates = hashMapOf(
+                                "stock" to newStock,
+                                "status" to newProductStatus
+                            )
+                            productRef.update(updates as Map<String, Any>).await()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
 
             // Crear notificación para el comprador: COMPRA
             val notifId = "notif_${System.currentTimeMillis()}_${(0..1000).random()}"
@@ -152,7 +186,12 @@ object PurchaseRepository {
             if (NetworkUtils.isNetworkAvailable(context)) {
                 try {
                     val firestore = FirebaseFirestore.getInstance()
-                    firestore.collection("purchases").document(purchaseId).update("status", newStatus).await()
+                    firestore.collection("purchases").document(purchaseId).update(
+                        mapOf(
+                            "status" to newStatus,
+                            "purchaseStatus" to newStatus
+                        )
+                    ).await()
                     firestore.collection("notifications").document(notification.id).set(notification).await()
                     firestore.collection("notifications").document(sellerNotification.id).set(sellerNotification).await()
                 } catch (e: Exception) {

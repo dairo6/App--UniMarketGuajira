@@ -63,6 +63,8 @@ class MyPurchasesAdapter(
         private val tvPurchaseStatus: TextView = itemView.findViewById(R.id.tvPurchaseStatus)
         
         private val tvPurchaseSeller: TextView = itemView.findViewById(R.id.tvPurchaseSeller)
+        private val tvPurchaseQuantity: TextView = itemView.findViewById(R.id.tvPurchaseQuantity)
+        private val tvPurchaseUnitPrice: TextView = itemView.findViewById(R.id.tvPurchaseUnitPrice)
         private val tvPurchaseDate: TextView = itemView.findViewById(R.id.tvPurchaseDate)
         private val tvPurchasePaymentMethod: TextView = itemView.findViewById(R.id.tvPurchasePaymentMethod)
         private val tvPurchaseDeliveryPoint: TextView = itemView.findViewById(R.id.tvPurchaseDeliveryPoint)
@@ -75,6 +77,8 @@ class MyPurchasesAdapter(
             val totalPriceStr = formatter.format(purchase.price * purchase.quantity)
             tvProductPrice.text = totalPriceStr
             tvPurchaseSeller.text = purchase.sellerId
+            tvPurchaseQuantity.text = purchase.quantity.toString()
+            tvPurchaseUnitPrice.text = formatter.format(purchase.price)
             tvPurchaseDate.text = dateFormat.format(Date(purchase.purchaseDate))
             tvPurchasePaymentMethod.text = purchase.paymentMethod
             tvPurchaseDeliveryPoint.text = purchase.deliveryPoint
@@ -136,19 +140,32 @@ class MyPurchasesAdapter(
             }
 
             btnPurchaseContactSeller.setOnClickListener {
-                val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:")
-                    putExtra(Intent.EXTRA_EMAIL, arrayOf(purchase.sellerId))
-                    putExtra(Intent.EXTRA_SUBJECT, "UniMarket Guajira - Consulta sobre compra")
-                    putExtra(
-                        Intent.EXTRA_TEXT,
-                        "Hola, me contacto contigo con respecto a la compra de \"${tvProductName.text}\" en UniMarket Guajira."
-                    )
-                }
-                try {
-                    context.startActivity(Intent.createChooser(emailIntent, "Contactar Vendedor"))
-                } catch (e: Exception) {
-                    Toast.makeText(context, "No se encontró un cliente de correo electrónico instalado", Toast.LENGTH_SHORT).show()
+                scope.launch {
+                    try {
+                        val progressDialog = android.app.ProgressDialog(context).apply {
+                            setMessage("Conectando con el vendedor...")
+                            setCancelable(false)
+                            show()
+                        }
+                        val chatRoom = com.example.unimarketguajira.repository.ChatRepository.getOrCreateChatRoom(
+                            context = context,
+                            idComprador = purchase.buyerId,
+                            idVendedor = purchase.sellerId,
+                            idProducto = purchase.productId
+                        )
+                        progressDialog.dismiss()
+
+                        val intent = Intent(context, com.example.unimarketguajira.activities.ChatActivity::class.java).apply {
+                            putExtra("CHAT_ID", chatRoom.id)
+                            putExtra("ID_COMPRADOR", chatRoom.id_comprador)
+                            putExtra("ID_VENDEDOR", chatRoom.id_vendedor)
+                            putExtra("ID_PRODUCTO", chatRoom.id_producto)
+                            putExtra("PRODUCT_NAME", tvProductName.text.toString())
+                        }
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 

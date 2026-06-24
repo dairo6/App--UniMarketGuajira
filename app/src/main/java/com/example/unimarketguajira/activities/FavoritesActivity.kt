@@ -73,8 +73,7 @@ class FavoritesActivity : AppCompatActivity() {
 
     private fun loadFavorites() {
         lifecycleScope.launch {
-            val allProducts = ProductRepository.getAllProducts(this@FavoritesActivity)
-            val favoritesList = allProducts.filter { it.isFavorite }
+            val favoritesList = ProductRepository.getFavoritesForUser(this@FavoritesActivity, userEmail)
             adapter.setData(favoritesList)
             layoutEmpty.visibility = if (favoritesList.isEmpty()) View.VISIBLE else View.GONE
         }
@@ -124,14 +123,33 @@ class FavoritesActivity : AppCompatActivity() {
 
                 // Check availability
                 val isUnavailable = product.status == "INACTIVE" || product.status == "SOLD"
-                tvUnavailableOverlay.visibility = if (isUnavailable) View.VISIBLE else View.GONE
-
-                // Click to view product
-                itemView.setOnClickListener {
-                    val intent = Intent(itemView.context, ProductDetailActivity::class.java).apply {
-                        putExtra("PRODUCT_ID", product.id)
+                
+                if (isUnavailable) {
+                    tvUnavailableOverlay.visibility = View.VISIBLE
+                    if (product.status == "INACTIVE") {
+                        tvUnavailableOverlay.text = "Eliminado por el vendedor"
+                    } else {
+                        tvUnavailableOverlay.text = "No disponible"
                     }
-                    itemView.context.startActivity(intent)
+                    itemView.alpha = 0.5f
+                    val matrix = android.graphics.ColorMatrix()
+                    matrix.setSaturation(0f)
+                    ivProductImage.colorFilter = android.graphics.ColorMatrixColorFilter(matrix)
+                    
+                    itemView.setOnClickListener(null)
+                    itemView.isClickable = false
+                } else {
+                    tvUnavailableOverlay.visibility = View.GONE
+                    itemView.alpha = 1.0f
+                    ivProductImage.colorFilter = null
+                    
+                    itemView.isClickable = true
+                    itemView.setOnClickListener {
+                        val intent = Intent(itemView.context, ProductDetailActivity::class.java).apply {
+                            putExtra("PRODUCT_ID", product.id)
+                        }
+                        itemView.context.startActivity(intent)
+                    }
                 }
 
                 // Remove from favorites
@@ -147,6 +165,7 @@ class FavoritesActivity : AppCompatActivity() {
                 if (isUnavailable) {
                     btnAddToCart.isEnabled = false
                     btnAddToCart.alpha = 0.5f
+                    btnAddToCart.setOnClickListener(null)
                 } else {
                     btnAddToCart.isEnabled = true
                     btnAddToCart.alpha = 1.0f

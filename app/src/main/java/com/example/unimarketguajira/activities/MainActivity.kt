@@ -44,19 +44,68 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        // Asegurar que el repositorio tenga datos
+        // Asegurar que el repositorio tenga datos y sincronizar el carrito
         lifecycleScope.launch {
             com.example.unimarketguajira.repository.ProductRepository.getAllProducts(this@MainActivity)
+            val loggedEmail = com.example.unimarketguajira.services.UserManager.getLoggedUserEmail(this@MainActivity)
+            if (loggedEmail != null) {
+                com.example.unimarketguajira.repository.CartRepository.syncFirebaseCartToLocal(this@MainActivity, loggedEmail)
+            }
         }
         
-        // Cargar fragment inicial
+        // Cargar fragment inicial o carrito si se solicita
         if (savedInstanceState == null) {
-            replaceFragment(HomeFragment())
+            val openCart = intent.getBooleanExtra("OPEN_CART", false)
+            if (openCart) {
+                replaceFragment(CartFragment(), addToBackStack = false)
+                findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation).selectedItemId = R.id.nav_cart
+            } else {
+                replaceFragment(HomeFragment())
+            }
         }
 
         findViewById<FloatingActionButton>(R.id.fabAddProduct).setOnClickListener {
             startActivity(Intent(this, PublishProductActivity::class.java))
         }
+
+        // Iniciar el listener de notificaciones de chat en tiempo real
+        com.example.unimarketguajira.services.ChatNotificationService.startListening(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        com.example.unimarketguajira.services.ChatNotificationService.stopListening()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val openCart = intent.getBooleanExtra("OPEN_CART", false)
+        if (openCart) {
+            replaceFragment(CartFragment(), addToBackStack = false)
+            findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation).selectedItemId = R.id.nav_cart
+        }
+    }
+
+    override fun onBackPressed() {
+        val callingActivity = intent.getStringExtra("CALLING_ACTIVITY")
+        if (callingActivity != null) {
+            try {
+                // Reset bottom navigation selection to Home to restore original tab state when returning
+                findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation).selectedItemId = R.id.nav_home
+                
+                val clazz = Class.forName(callingActivity)
+                val intent = Intent(this, clazz).apply {
+                    flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                }
+                this.intent.removeExtra("CALLING_ACTIVITY")
+                startActivity(intent)
+                return
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        super.onBackPressed()
     }
 
     // Eliminamos initDefaultProducts de aquí, ya que ahora reside en el Repository
@@ -87,14 +136,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun replaceFragment(fragment: Fragment) {
+    private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean = true) {
         val transaction = supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
         
         // Si no es el Home, lo añadimos a la pila para poder volver atrás
-        if (fragment !is HomeFragment) {
+        if (addToBackStack && fragment !is HomeFragment) {
             transaction.addToBackStack(null)
-        } else {
+        } else if (fragment is HomeFragment) {
             // Si volvemos al Home, limpiamos la pila para evitar bucles
             supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
